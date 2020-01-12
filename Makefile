@@ -39,6 +39,7 @@ OUTHEX := $(OUT)/$(PROJECT).hex
 OUTBIN := $(OUT)/$(PROJECT).bin
 
 # all source
+ifeq (0, 1)
 ALLSRC := \
 $(addprefix lib/Arduino_Core_A3ides/cores/arduino/,HardwareSerial.cpp Print.cpp SPI.cpp Stream.cpp USBSerial.cpp\
 	Wire.cpp wiring_analog.c wiring_digital.c wiring_time.c WMath.cpp)\
@@ -138,6 +139,9 @@ $(addprefix src/,ethernetif.c fatfs.c freertos.c freertos_openocd.c fs_custom.c 
 	usbd_conf.c usbd_desc.c usbh_conf.c usbh_diskio.c startup/startup_stm32f407xx_boot.s)\
 $(addprefix src/wui/,connect.cpp connection.cpp http_states.c lwsapi.cpp)\
 $(addprefix lib/inih/,ini.c)
+else
+ALLSRC := $(file < make/srclist.mk)
+endif
 
 # external definitions
 SYMBOLS := \
@@ -289,5 +293,8 @@ clean:
 ifneq ("$(wildcard $(OUT))","")
 	@$(DIR_RM) $(subst /,$(DIRSEP),$(OUT))
 endif
+
+list_src:
+	@echo $(ALLSRC)
 
 .PHONY: all clean
