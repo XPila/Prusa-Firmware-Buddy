@@ -1,6 +1,6 @@
 $(addprefix lib/,\
 	$(addprefix Arduino_Core_A3ides/cores/arduino/,wiring_analog.c wiring_digital.c wiring_time.c HardwareSerial.cpp Print.cpp SPI.cpp Stream.cpp USBSerial.cpp)\
-	$(addprefix Drivers/STM32F4xx_HAL_Driver/Src/,stm32f4xx_hal.c stm32f4xx_hal_adc.c stm32f4xx_hal_cortex.c stm32f4xx_hal_dma.c stm32f4xx_hal_eth.c stm32f4xx_hal_flash.c stm32f4xx_hal_gpio.c stm32f4xx_hal_hcd.c stm32f4xx_hal_i2c.c stm32f4xx_hal_pcd.c stm32f4xx_hal_pcd_ex.c stm32f4xx_hal_rcc.c stm32f4xx_hal_spi.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c stm32f4xx_hal_uart.c stm32f4xx_ll_usb.c)\
+	$(addprefix Drivers/STM32F4xx_HAL_Driver/Src/,stm32f4xx_hal.c stm32f4xx_hal_adc.c stm32f4xx_hal_cortex.c stm32f4xx_hal_dma.c stm32f4xx_hal_eth.c stm32f4xx_hal_flash.c stm32f4xx_hal_gpio.c stm32f4xx_hal_hcd.c stm32f4xx_hal_i2c.c stm32f4xx_hal_iwdg.c stm32f4xx_hal_pcd.c stm32f4xx_hal_pcd_ex.c stm32f4xx_hal_rcc.c stm32f4xx_hal_spi.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c stm32f4xx_hal_uart.c stm32f4xx_ll_usb.c)\
 	$(addprefix inih/,ini.c)\
 	$(addprefix Marlin/Marlin/src/,Marlin.cpp\
 		$(addprefix core/,serial.cpp utility.cpp)\
@@ -18,7 +18,7 @@ $(addprefix lib/,\
 			$(addprefix sdcard/,M20.cpp M21_M22.cpp M23.cpp M24_M25.cpp M26.cpp M27.cpp M28_M29.cpp M30.cpp M32.cpp M524.cpp M928.cpp)\
 			$(addprefix stats/,M31.cpp M75-M78.cpp)\
 			$(addprefix temperature/,M104_M109.cpp M105.cpp M106_M107.cpp M140_M190.cpp M155.cpp M303.cpp))\
-		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp persistent_store_eeprom.cpp STM32F4/timers.cpp)\
+		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp persistent_store_eeprom.cpp STM32F4/timers.cpp watchdog.cpp)\
 		$(addprefix lcd/,extensible_ui/ui_api.cpp ultralcd.cpp)\
 		$(addprefix libs/,buzzer.cpp crc16.cpp nozzle.cpp stopwatch.cpp)\
 		$(addprefix module/,configuration_store.cpp endstops.cpp motion.cpp planner.cpp probe.cpp stepper.cpp temperature.cpp tool_change.cpp stepper/indirection.cpp stepper/trinamic.cpp))\
