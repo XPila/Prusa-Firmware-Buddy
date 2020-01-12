@@ -14,7 +14,7 @@ ARDUINO     := 187
 # default matherboard A3IDES_2209_02
 MOTHERBOARD := 1823
 
-# target platform prefix
+# target platform prefix, default is arm-atollic-eabi
 PREFIX ?= arm-atollic-eabi
 
 # output folder (output directory tree will be automaticaly created)
@@ -43,7 +43,7 @@ ifeq (1, 1)
 ALLSRC := \
 $(addprefix lib/,\
 	$(addprefix Arduino_Core_A3ides/cores/arduino/,wiring_analog.c wiring_digital.c wiring_time.c HardwareSerial.cpp Print.cpp SPI.cpp Stream.cpp USBSerial.cpp)\
-	$(addprefix Drivers/STM32F4xx_HAL_Driver/Src/,stm32f4xx_hal.c stm32f4xx_hal_adc.c stm32f4xx_hal_cortex.c stm32f4xx_hal_dma.c stm32f4xx_hal_eth.c stm32f4xx_hal_flash.c stm32f4xx_hal_gpio.c stm32f4xx_hal_hcd.c stm32f4xx_hal_i2c.c stm32f4xx_hal_pcd.c stm32f4xx_hal_pcd_ex.c stm32f4xx_hal_rcc.c stm32f4xx_hal_spi.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c stm32f4xx_hal_uart.c stm32f4xx_ll_usb.c)\
+	$(addprefix Drivers/STM32F4xx_HAL_Driver/Src/,stm32f4xx_hal.c stm32f4xx_hal_adc.c stm32f4xx_hal_cortex.c stm32f4xx_hal_dma.c stm32f4xx_hal_eth.c stm32f4xx_hal_flash.c stm32f4xx_hal_gpio.c stm32f4xx_hal_hcd.c stm32f4xx_hal_i2c.c stm32f4xx_hal_iwdg.c stm32f4xx_hal_pcd.c stm32f4xx_hal_pcd_ex.c stm32f4xx_hal_rcc.c stm32f4xx_hal_spi.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c stm32f4xx_hal_uart.c stm32f4xx_ll_usb.c)\
 	$(addprefix inih/,ini.c)\
 	$(addprefix Marlin/Marlin/src/,Marlin.cpp\
 		$(addprefix core/,serial.cpp utility.cpp)\
@@ -61,7 +61,7 @@ $(addprefix lib/,\
 			$(addprefix sdcard/,M20.cpp M21_M22.cpp M23.cpp M24_M25.cpp M26.cpp M27.cpp M28_M29.cpp M30.cpp M32.cpp M524.cpp M928.cpp)\
 			$(addprefix stats/,M31.cpp M75-M78.cpp)\
 			$(addprefix temperature/,M104_M109.cpp M105.cpp M106_M107.cpp M140_M190.cpp M155.cpp M303.cpp))\
-		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp persistent_store_eeprom.cpp STM32F4/timers.cpp)\
+		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp persistent_store_eeprom.cpp STM32F4/timers.cpp watchdog.cpp)\
 		$(addprefix lcd/,extensible_ui/ui_api.cpp ultralcd.cpp)\
 		$(addprefix libs/,buzzer.cpp crc16.cpp nozzle.cpp stopwatch.cpp)\
 		$(addprefix module/,configuration_store.cpp endstops.cpp motion.cpp planner.cpp probe.cpp stepper.cpp temperature.cpp tool_change.cpp stepper/indirection.cpp stepper/trinamic.cpp))\
@@ -88,76 +88,53 @@ $(addprefix src/,startup/startup_stm32f407xx_boot.s ethernetif.c fatfs.c lwip.c 
 		$(addprefix Test/,screen_test.c screen_test_disp_mem.c screen_test_graph.c screen_test_gui.c screen_test_msgbox.c screen_test_term.c screen_mesh_bed_lv.cpp screen_test_temperature.cpp)\
 		$(addprefix Wizard/,firstlay.c screen_wizard.c selftest.c selftest_cool.c selftest_fans_axis.c selftest_home.c selftest_temp.c wizard.c wizard_load_unload.c wizard_ui.c xyzcalib.c))\
 	$(addprefix guiapi/src/,button_draw.c display.c display_helper.c gui.c gui_timer.c guitypes.c jogwheel.c screen.c st7789v.c term.c window.c window_frame.c window_icon.c window_list.c window_menu.c window_msgbox.c window_numb.c window_progress.c window_spin.c window_term.c window_text.c)\
-	$(addprefix wui/,http_states.c connect.cpp connection.cpp lwsapi.cpp))
+	$(addprefix wui/,http_states.c connect.cpp connection.cpp lwsapi.cpp)\
+)
 else
 ALLSRC := $(file < make/srclist.mk)
 endif
 
 # external definitions
-SYMBOLS := \
-	-D__weak='__attribute__((weak))' \
-	-D__packed='__attribute__((__packed__))' \
-	-DSTM32F407xx \
-	-DSTM32F4xx \
-	-DHAVE_HWSERIAL2 \
-	-DSTM32GENERIC \
-	-DSTM32F4 \
-	-DARDUINO=$(ARDUINO) \
-	-DMOTHERBOARD=$(MOTHERBOARD) \
-	-DUSE_HAL_DRIVER \
-	-DUSBD_USE_CDC \
-	-DUSBCON \
-	-D_EXTUI \
-	-DLWIP_HTTPD_CUSTOM_FILES=1 \
-	-DMARLIN_DISABLE_INFINITE_LOOP \
-	-DPRINTER_TYPE=$(PRINTER) \
-	-DFW_BUILDNR=$(FW_BUILDNR) \
-	-DFW_VERSION=$(FW_VERSION) \
-	-D_DEBUG
+SYMBOLS := $(addprefix -D,\
+	__weak='__attribute__((weak))'\
+	__packed='__attribute__((__packed__))'\
+	STM32F407xx\
+	STM32F4xx\
+	HAVE_HWSERIAL2\
+	STM32GENERIC\
+	STM32F4\
+	ARDUINO=$(ARDUINO)\
+	MOTHERBOARD=$(MOTHERBOARD)\
+	USE_HAL_DRIVER\
+	USBD_USE_CDC\
+	USBCON\
+	_EXTUI\
+	LWIP_HTTPD_CUSTOM_FILES=1\
+	MARLIN_DISABLE_INFINITE_LOOP\
+	PRINTER_TYPE=$(PRINTER)\
+	FW_BUILDNR=$(FW_BUILDNR)\
+	FW_VERSION=$(FW_VERSION)\
+)
 
-INCLUDES := \
-	-I./include \
-	-I./include/freertos \
-	-I./include/marlin \
-	-I./include/stm32f4_hal \
-	-I./include/usb_device \
-	-I./include/usb_host \
-	-I./lib/Drivers/STM32F4xx_HAL_Driver/Inc \
-	-I./lib/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
-	-I./lib/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
-	-I./lib/Drivers/CMSIS/Include \
-	-I./lib/Middlewares/Third_Party/FatFs/src \
-	-I./lib/Middlewares/Third_Party/FreeRTOS/Source/include \
-	-I./lib/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-	-I./lib/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-	-I./lib/Middlewares/ST/STM32_USB_Device_Library/Core/Inc \
-	-I./lib/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
-	-I./lib/Middlewares/ST/STM32_USB_Host_Library/Core/Inc \
-	-I./lib/Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc \
-	-I./lib/Arduino_Core_A3ides/cores/arduino \
-	-I./lib/Arduino_Core_A3ides/cores/arduino/stm32 \
-	-I./lib/Arduino_Core_A3ides/variants/A3IDES_F407VET6_2209 \
-	-I./lib/LiquidCrystal_I2C \
-	-I./lib/TMCStepper/src \
-	-I./lib/Middlewares/Third_Party/zlib \
-	-I./lib/Middlewares/Third_Party/lpng \
-	-I./src/gui \
-	-I./src/gui/Dialogs \
-	-I./src/guiapi/include \
-	-I./src/wui \
-	-I./src/common \
-	-I./lib/Marlin/Marlin \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include \
-	-I./lib/Middlewares/Third_Party/LwIP/system \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/netif/ppp \
-	-I./lib/Middlewares/Third_Party/LwIP/src/apps/httpd \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/lwip \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/lwip/apps \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/lwip/priv \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/lwip/prot \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/netif \
-	-I./lib/Middlewares/Third_Party/LwIP/src/include/posix \
-	-I./lib/inih
+# include directories
+INCLUDES := $(addprefix -I./,\
+	include $(addprefix include/, freertos marlin stm32f4_hal usb_device usb_host)\
+	$(addprefix lib/Drivers/STM32F4xx_HAL_Driver/,Inc Inc/Legacy)\
+	$(addprefix lib/Drivers/CMSIS/, Device/ST/STM32F4xx/Include Include)\
+	$(addprefix lib/Middlewares/Third_Party/, FatFs/src\
+		$(addprefix FreeRTOS/Source/,include CMSIS_RTOS portable/GCC/ARM_CM4F))\
+	$(addprefix lib/Middlewares/ST/STM32_USB_Device_Library/, Core/Inc Class/CDC/Inc)\
+	$(addprefix lib/Middlewares/ST/STM32_USB_Host_Library/, Core/Inc Class/MSC/Inc)\
+	$(addprefix lib/Arduino_Core_A3ides/, cores/arduino cores/arduino/stm32 variants/A3IDES_F407VET6_2209)\
+	lib/LiquidCrystal_I2C\
+	lib/TMCStepper/src\
+	$(addprefix lib/Middlewares/Third_Party/,zlib lpng)\
+	$(addprefix src/, gui gui/Dialogs guiapi/include wui common)\
+	lib/Marlin/Marlin\
+	$(addprefix lib/Middlewares/Third_Party/LwIP/,system src/apps/httpd src/include\
+		$(addprefix src/include/, netif/ppp lwip lwip/apps lwip/priv lwip/prot netif posix))\
+	lib/inih\
+)
 
 # common flags
 CMNFLAGS := -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections
@@ -169,10 +146,9 @@ GPPFLAGS := $(CMNFLAGS) -std=gnu++11 $(SYMBOLS) $(INCLUDES) -fno-exceptions -fst
 
 # debug/release configuration (optimalization and debug info flags + _DEBUG symbol)
 ifneq (,$(findstring Debug, $(CONFIG)))
-#	SYMBOLS  += -D_DEBUG
 	ASMFLAGS += -g
-	GCCFLAGS += -O0 -g
-	GPPFLAGS += -O0 -g
+	GCCFLAGS += -O0 -g -D_DEBUG
+	GPPFLAGS += -O0 -g -D_DEBUG
 else
 	GCCFLAGS += -Os
 	GPPFLAGS += -Os
@@ -203,9 +179,7 @@ ASMOBJ := $(addprefix $(OUT)/,$(ASMSRC:.s=.o))
 GCCOBJ := $(addprefix $(OUT)/,$(GCCSRC:.c=.o))
 GPPOBJ := $(addprefix $(OUT)/,$(GPPSRC:.cpp=.o))
 
-
 all: $(OUTELF) $(OUTHEX) $(OUTBIN)
-
 
 $(OUTDIR):
 	@echo creating output directory tree
@@ -243,8 +217,5 @@ clean:
 ifneq ("$(wildcard $(OUT))","")
 	@$(DIR_RM) $(subst /,$(DIRSEP),$(OUT))
 endif
-
-list_src:
-	@echo $(ALLSRC)
 
 .PHONY: all clean
