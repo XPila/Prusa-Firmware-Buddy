@@ -219,3 +219,12 @@ ifneq ("$(wildcard $(OUT))","")
 endif
 
 .PHONY: all clean
+
+print_vars:
+	@echo ''
+	@echo 'BUILD_CONFIGURATION='$(BUILD_CONFIGURATION)
+	@echo 'CWD='$(CWD)
+	@echo 'GCC_EXEC_PREFIX='$(GCC_EXEC_PREFIX)
+	@echo 'PATH='$(PATH)
+	@echo 'PWD='$(PWD)
+	@echo 'TOOLCHAIN_PATH='$(TOOLCHAIN_PATH)
