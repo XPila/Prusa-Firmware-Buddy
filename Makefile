@@ -1,8 +1,19 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # Makefile to compile and link Prusa-Firmware-Buddy
 PROJECT := Prusa-Firmware-Buddy
-# default config release boot
-CONFIG  ?= Release_Boot
+
+# build configuration, default is Release_Boot
+BUILD_CONFIGURATION  ?= Release_Boot
+# target platform prefix, default is arm-none-eabi
+TOOLCHAIN_PREFIX ?= arm-none-eabi
+
+# file path separator for SHELL_RMDIR and SHELL_MKDIR (default is unix '/', for windows use - '\\')
+PATH_SEPARATOR ?= /
+# shell command for removing directories (default is unix, for windows use - 'SHELL_RMDIR /S /Q')
+SHELL_RMDIR ?= rm -rvf
+# shell command for creating directories (default is unix, for windows use - 'SHELL_MKDIR')
+SHELL_MKDIR ?= mkdir -p
+
 # default printer MINI
 PRINTER ?= 2
 # default firmware buildnumber 1
@@ -14,23 +25,13 @@ ARDUINO     := 187
 # default matherboard A3IDES_2209_02
 MOTHERBOARD := 1823
 
-# target platform prefix, default is arm-atollic-eabi
-PREFIX ?= arm-atollic-eabi
-
 # output folder (output directory tree will be automaticaly created)
-OUT := build/$(CONFIG)
-
-# file path separator for DIR_RM and DIR_MK (default is unix '/', for windows use - '\\')
-DIRSEP ?= /
-# shell command for removing directories (default is unix, for windows use - 'RMDIR /S /Q')
-DIR_RM ?= rm -rvf
-# shell command for creating directories (default is unix, for windows use - 'MKDIR')
-DIR_MK ?= mkdir -p
+OUT := build/$(BUILD_CONFIGURATION)
 
 # gcc, g++ and objcopy tool
-GCC    := $(PREFIX)-gcc
-GPP    := $(PREFIX)-g++
-OBJCPY := $(PREFIX)-objcopy
+GCC    := $(TOOLCHAIN_PREFIX)-gcc
+GPP    := $(TOOLCHAIN_PREFIX)-g++
+OBJCPY := $(TOOLCHAIN_PREFIX)-objcopy
 
 # output files
 OUTDIR := $(OUT)/$(PROJECT).dir
@@ -145,7 +146,7 @@ GCCFLAGS := $(CMNFLAGS) -std=gnu11 $(SYMBOLS) $(INCLUDES) -fstack-usage -Wall
 GPPFLAGS := $(CMNFLAGS) -std=gnu++11 $(SYMBOLS) $(INCLUDES) -fno-exceptions -fstack-usage -Wall -fno-threadsafe-statics
 
 # debug/release configuration (optimalization and debug info flags + _DEBUG symbol)
-ifneq (,$(findstring Debug, $(CONFIG)))
+ifneq (,$(findstring Debug, $(BUILD_CONFIGURATION)))
 	ASMFLAGS += -g
 	GCCFLAGS += -O0 -g -D_DEBUG
 	GPPFLAGS += -O0 -g -D_DEBUG
@@ -155,7 +156,7 @@ else
 endif
 
 # boot/noboot configuration - linker script
-ifneq (,$(findstring Boot, $(CONFIG)))
+ifneq (,$(findstring Boot, $(BUILD_CONFIGURATION)))
 	LDSCRIPT := "./src/STM32F407VG_FLASH_boot.ld"
 else
 	LDSCRIPT := "./src/STM32F407VG_FLASH.ld"
@@ -183,8 +184,8 @@ all: $(OUTELF) $(OUTHEX) $(OUTBIN)
 
 $(OUTDIR):
 	@echo creating output directory tree
-	@$(DIR_MK) $(subst /,$(DIRSEP),$(OUT))
-	@$(DIR_MK) $(subst /,$(DIRSEP),$(ALLDIR))
+	@$(SHELL_MKDIR) $(subst /,$(PATH_SEPARATOR),$(OUT))
+	@$(SHELL_MKDIR) $(subst /,$(PATH_SEPARATOR),$(ALLDIR))
 	@echo >$(OUTDIR)
 
 $(OUT)/%.o: %.s $(OUTDIR)
@@ -215,16 +216,9 @@ $(OUTBIN): $(OUTELF)
 clean:
 	@echo removing output files
 ifneq ("$(wildcard $(OUT))","")
-	@$(DIR_RM) $(subst /,$(DIRSEP),$(OUT))
+	@$(SHELL_RMDIR) $(subst /,$(PATH_SEPARATOR),$(OUT))
 endif
 
 .PHONY: all clean
 
-print_vars:
-	@echo ''
-	@echo 'BUILD_CONFIGURATION='$(BUILD_CONFIGURATION)
-	@echo 'CWD='$(CWD)
-	@echo 'GCC_EXEC_PREFIX='$(GCC_EXEC_PREFIX)
-	@echo 'PATH='$(PATH)
-	@echo 'PWD='$(PWD)
-	@echo 'TOOLCHAIN_PATH='$(TOOLCHAIN_PATH)
+include Debug.mk
