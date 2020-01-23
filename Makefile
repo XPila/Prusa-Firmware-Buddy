@@ -4,6 +4,11 @@ PROJECT := Prusa-Firmware-Buddy
 
 # build configuration, default is Release_Boot
 BUILD_CONFIGURATION  ?= Release_Boot
+# check valid build configuration
+ifneq (,$(filter-out Debug_Boot Release_Boot mini_debug_emptyboot mini_release_emptyboot, $(BUILD_CONFIGURATION)))
+$(error invalid configuration "$(BUILD_CONFIGURATION)")
+endif
+
 # target platform prefix, default is arm-none-eabi
 TOOLCHAIN_PREFIX ?= arm-none-eabi
 
