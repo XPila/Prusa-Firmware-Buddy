@@ -22,7 +22,7 @@ SHELL_MKDIR ?= mkdir -p
 # default printer MINI
 PRINTER ?= 2
 # default firmware buildnumber 1
-FW_BUILDNR ?= 1
+FW_BUILD_NUMBER ?= 1
 # default firmware version 4.0.2
 FW_VERSION ?= 402
 # default arduino version 1.87
@@ -118,7 +118,7 @@ SYMBOLS := $(addprefix -D,\
 	LWIP_HTTPD_CUSTOM_FILES=1\
 	MARLIN_DISABLE_INFINITE_LOOP\
 	PRINTER_TYPE=$(PRINTER)\
-	FW_BUILDNR=$(FW_BUILDNR)\
+	FW_BUILD_NUMBER=$(FW_BUILD_NUMBER)\
 	FW_VERSION=$(FW_VERSION)\
 )
 
@@ -224,6 +224,7 @@ ifneq ("$(wildcard $(OUT))","")
 	@$(SHELL_RMDIR) $(subst /,$(PATH_SEPARATOR),$(OUT))
 endif
 
-.PHONY: all clean
+.PHONY: all clean cmake
 
+include CMake.mk
 include Debug.mk
