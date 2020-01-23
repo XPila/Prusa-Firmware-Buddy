@@ -3,9 +3,9 @@
 PROJECT := Prusa-Firmware-Buddy
 
 # build configuration, default is Release_Boot
-BUILD_CONFIGURATION  ?= Release_Boot
+BUILD_CONFIGURATION  ?= MINI_Release_Boot
 # check valid build configuration
-ifneq (,$(filter-out Debug_Boot Release_Boot mini_debug_emptyboot mini_release_emptyboot, $(BUILD_CONFIGURATION)))
+ifneq (,$(filter-out MINI_Debug_Boot MINI_Release_Boot mini_debug_emptyboot mini_release_emptyboot, $(BUILD_CONFIGURATION)))
 $(error invalid configuration "$(BUILD_CONFIGURATION)")
 endif
 
