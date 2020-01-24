@@ -227,5 +227,6 @@ endif
 
 .PHONY: all clean cmake
 
-include CMake.mk
-include Debug.mk
+include make/CMake.mk
+include make/Debug.mk
+include make/Eclipse.mk
