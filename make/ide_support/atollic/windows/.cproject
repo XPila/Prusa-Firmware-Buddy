@@ -207,13 +207,13 @@
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="MINI_Debug_Boot">
-			<resource resourceType="PROJECT" workspacePath="/Prusa-Firmware-Buddy_Make"/>
-		</configuration>
 		<configuration configurationName="MINI_Release_Boot">
 			<resource resourceType="PROJECT" workspacePath="/Prusa-Firmware-Buddy_Make"/>
 		</configuration>
 		<configuration configurationName="mini_debug_emptyboot">
+			<resource resourceType="PROJECT" workspacePath="/Prusa-Firmware-Buddy_Make"/>
+		</configuration>
+		<configuration configurationName="MINI_Debug_Boot">
 			<resource resourceType="PROJECT" workspacePath="/Prusa-Firmware-Buddy_Make"/>
 		</configuration>
 		<configuration configurationName="mini_release_emptyboot">
