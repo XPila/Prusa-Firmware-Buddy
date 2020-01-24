@@ -170,7 +170,8 @@ endif
 # linker flags
 LDFLAGS  := $(CMNFLAGS) -T$(LDSCRIPT) -specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler\
 	-Wl,-Map="$(OUT)/$(PROJECT).map" -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x1000\
-	-Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	-Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group\
+	-specs=nano.specs -u _printf_float
 
 # list of all directories
 ALLDIR := $(addprefix $(OUT)/,$(sort $(subst / , ,$(dir $(ALLSRC)) )))
