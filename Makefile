@@ -1,11 +1,17 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # Makefile to compile and link Prusa-Firmware-Buddy
-PROJECT := Prusa-Firmware-Buddy
+PROJECT ?= Prusa-Firmware-Buddy
 
-# build configuration, default is Release_Boot
+# build configuration list for make
+MAKE_CONFIGURATIONS  := MINI_Debug_Boot MINI_Release_Boot
+# build configuration list for cmake
+CMAKE_CONFIGURATIONS := mini_debug_emptyboot mini_release_emptyboot
+# list of all build configurations
+ALL_CONFIGURATIONS   := $(MAKE_CONFIGURATIONS) $(CMAKE_CONFIGURATIONS)
+# selected build configuration, default is MINI_Release_Boot
 BUILD_CONFIGURATION  ?= MINI_Release_Boot
 # check valid build configuration
-ifneq (,$(filter-out MINI_Debug_Boot MINI_Release_Boot mini_debug_emptyboot mini_release_emptyboot, $(BUILD_CONFIGURATION)))
+ifneq (,$(filter-out $(ALL_CONFIGURATIONS), $(BUILD_CONFIGURATION)))
 $(error invalid configuration "$(BUILD_CONFIGURATION)")
 endif
 
@@ -18,6 +24,10 @@ PATH_SEPARATOR ?= /
 SHELL_RMDIR ?= rm -rvf
 # shell command for creating directories (default is unix, for windows use - 'SHELL_MKDIR')
 SHELL_MKDIR ?= mkdir -p
+# shell command 'cat'
+SHELL_CAT ?= $(if $(findstring /,$(PATH_SEPARATOR)),cat,type)
+# shell command separator
+SHELL_CMDSEP ?= $(if $(findstring /,$(PATH_SEPARATOR)), ; , & )
 
 # default printer MINI
 PRINTER ?= 2
@@ -39,10 +49,10 @@ GPP    := $(TOOLCHAIN_PREFIX)-g++
 OBJCPY := $(TOOLCHAIN_PREFIX)-objcopy
 
 # output files
-OUTDIR := $(OUT)/$(PROJECT).dir
-OUTELF := $(OUT)/$(PROJECT).elf
-OUTHEX := $(OUT)/$(PROJECT).hex
-OUTBIN := $(OUT)/$(PROJECT).bin
+OUTDIR := $(OUT)/$(PROJECT).dir # file containing list of created directories
+OUTELF := $(OUT)/$(PROJECT).elf # elf output file
+OUTHEX := $(OUT)/$(PROJECT).hex # hex output file
+OUTBIN := $(OUT)/$(PROJECT).bin # bin output file
 
 # all source
 ifeq (1, 1)
@@ -146,18 +156,19 @@ INCLUDES := $(addprefix -I./,\
 CMNFLAGS := -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections
 
 # compiler flags
-ASMFLAGS := $(CMNFLAGS) $(SYMBOLS) -Wa,--no-warn -x assembler-with-cpp
-GCCFLAGS := $(CMNFLAGS) -std=gnu11 $(SYMBOLS) $(INCLUDES) -fstack-usage -Wall
-GPPFLAGS := $(CMNFLAGS) -std=gnu++11 $(SYMBOLS) $(INCLUDES) -fno-exceptions -fstack-usage -Wall -fno-threadsafe-statics
+ASMFLAGS := $(CMNFLAGS) -Wa,--no-warn -x assembler-with-cpp
+GCCFLAGS := $(CMNFLAGS) -std=gnu11 $(INCLUDES) -fstack-usage -Wall
+GPPFLAGS := $(CMNFLAGS) -std=gnu++11 $(INCLUDES) -fno-exceptions -fstack-usage -Wall -fno-threadsafe-statics
 
 # debug/release configuration (optimalization and debug info flags + _DEBUG symbol)
 ifneq (,$(findstring Debug, $(BUILD_CONFIGURATION)))
-	ASMFLAGS += -g
-	GCCFLAGS += -O0 -g -D_DEBUG
-	GPPFLAGS += -O0 -g -D_DEBUG
+	SYMBOLS += -D_DEBUG
+	ASMFLAGS += -g $(SYMBOLS)
+	GCCFLAGS += -O0 -g $(SYMBOLS)
+	GPPFLAGS += -O0 -g $(SYMBOLS)
 else
-	GCCFLAGS += -Os
-	GPPFLAGS += -Os
+	GCCFLAGS += -Os -g $(SYMBOLS)
+	GPPFLAGS += -Os -g $(SYMBOLS)
 endif
 
 # boot/noboot configuration - linker script
@@ -186,13 +197,18 @@ ASMOBJ := $(addprefix $(OUT)/,$(ASMSRC:.s=.o))
 GCCOBJ := $(addprefix $(OUT)/,$(GCCSRC:.c=.o))
 GPPOBJ := $(addprefix $(OUT)/,$(GPPSRC:.cpp=.o))
 
-all: $(OUTELF) $(OUTHEX) $(OUTBIN)
+build:
+ifeq (,$(filter-out $(MAKE_CONFIGURATIONS), $(BUILD_CONFIGURATION)))
+	@make -s $(OUTELF) $(OUTHEX) $(OUTBIN)
+else
+	@make -s cmake
+endif
 
 $(OUTDIR):
 	@echo creating output directory tree
 	@$(SHELL_MKDIR) $(subst /,$(PATH_SEPARATOR),$(OUT))
 	@$(SHELL_MKDIR) $(subst /,$(PATH_SEPARATOR),$(ALLDIR))
-	@echo >$(OUTDIR)
+	@echo $(ALLDIR) >$(OUTDIR)
 
 $(OUT)/%.o: %.s $(OUTDIR)
 	@echo compiling $<
@@ -220,13 +236,24 @@ $(OUTBIN): $(OUTELF)
 	@$(OBJCPY) -O binary $< $@
 
 clean:
-	@echo removing output files
+	@echo removing output files $(OUT)
 ifneq ("$(wildcard $(OUT))","")
 	@$(SHELL_RMDIR) $(subst /,$(PATH_SEPARATOR),$(OUT))
 endif
 
-.PHONY: all clean cmake
+.PHONY: all build clean build_all clean_all cmake
+
+clean_all:
+	@echo removing output files of ALL configurations
+	@$(foreach cfg,$(ALL_CONFIGURATIONS),make -s clean BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
+
+build_all:
+	@echo building ALL configurations
+	$(foreach cfg,$(MAKE_CONFIGURATIONS),make -s build BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
 
 include make/CMake.mk
 include make/Debug.mk
 include make/Eclipse.mk
+#include make/Atollic.mk
+#include make/CubeIDE.mk
+#include make/VSCode.mk
