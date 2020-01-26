@@ -251,9 +251,9 @@ build_all:
 	@echo building ALL configurations
 	$(foreach cfg,$(MAKE_CONFIGURATIONS),make -s build BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
 
-include make/CMake.mk
-include make/Debug.mk
-include make/Eclipse.mk
-#include make/Atollic.mk
+#include make/CMake.mk
+#include make/Debug.mk
+#include make/Eclipse.mk
+include make/Atollic.mk
 #include make/CubeIDE.mk
 #include make/VSCode.mk

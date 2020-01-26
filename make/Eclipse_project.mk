@@ -4,14 +4,14 @@
 # generate eclipse project file ".project"
 eclipse_project:
 	@echo generting eclipse .project xml file
-	$(file > make/project.xml,$(eclipse_xml_project))
+	$(file > make/.project,$(eclipse_xml_project))
 
 
 # project
 define eclipse_xml_project
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Prusa-Firmware-Buddy_Make</name>
+	<name>$(PROJECT)</name>
 	<comment></comment>
 	<projects>
 	</projects>
