@@ -54,7 +54,6 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.320776978" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc">
 								<option id="com.atollic.truestudio.common_options.target.fpucore.1017744015" name="FPU" superClass="com.atollic.truestudio.common_options.target.fpucore" value="com.atollic.truestudio.common_options.target.fpucore.fpv4-sp-d16" valueType="enumerated"/>
 								<option id="com.atollic.truestudio.gcc.directories.select.1217573971" name="Include path" superClass="com.atollic.truestudio.gcc.directories.select" valueType="includePath">
-									<listOptionValue builtIn="false" value="../include"/>
 									<listOptionValue builtIn="false" value="../include/freertos"/>
 									<listOptionValue builtIn="false" value="../include/marlin"/>
 									<listOptionValue builtIn="false" value="../include/stm32f4_hal"/>
@@ -96,6 +95,7 @@
 									<listOptionValue builtIn="false" value="../lib/Middlewares/Third_Party/LwIP/src/include/netif"/>
 									<listOptionValue builtIn="false" value="../lib/Middlewares/Third_Party/LwIP/src/include/posix"/>
 									<listOptionValue builtIn="false" value="../lib/inih"/>
+									<listOptionValue builtIn="false" value="../include"/>
 								</option>
 								<option id="com.atollic.truestudio.gcc.symbols.defined.1388051271" name="Defined symbols" superClass="com.atollic.truestudio.gcc.symbols.defined" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak='__attribute__((weak))'"/>
@@ -629,6 +629,37 @@
 				<buildTarget>build_all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="eclipse_cproject" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildTarget>eclipse_cproject</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="atollic" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>atollic</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="atollic_cproject" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>atollic_cproject</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="atollic_settings" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>atollic_settings</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
 		</buildTargets>
