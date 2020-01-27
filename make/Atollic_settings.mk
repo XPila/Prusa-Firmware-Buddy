@@ -43,8 +43,6 @@ atollic_env_uri := environment/project/com.atollic.truestudio.exe.debug.toolchai
 define atollic_prefs_settings_cdt_core =
 eclipse.preferences.version=1
 $(call atollic_prefs_settings_cdt_core_config,1147268816)
-$(atollic_env_uri).$(1)/append=true
-$(atollic_env_uri).$(1)/appendContributed=true
 endef
 
 # config in atollic_prefs_settings_cdt_core, args: (1)config_id
@@ -53,6 +51,8 @@ $(call atollic_prefs_settings_cdt_core_item,$(1),PATH_SEPARATOR,\\\\)
 $(call atollic_prefs_settings_cdt_core_item,$(1),SHELL_MKDIR,MKDIR)
 $(call atollic_prefs_settings_cdt_core_item,$(1),SHELL_RMDIR,RMDIR /S /Q)
 $(call atollic_prefs_settings_cdt_core_item,$(1),TOOLCHAIN_PREFIX,arm-atollic-eabi)
+$(atollic_env_uri).$(1)/append=true
+$(atollic_env_uri).$(1)/appendContributed=true
 endef
 
 # item in atollic_prefs_settings_cdt_core, args: (1)config_id, (2)name, (3)value

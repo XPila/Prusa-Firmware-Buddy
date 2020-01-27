@@ -9,8 +9,8 @@ include make/Atollic_settings.mk
 # generate Atollic project file ".project"
 atollic:
 	@echo generting Atollic project "$(PROJECT)"
-	@make -s eclipse_project
-	@make -s atollic_cproject
-	@make -s atollic_settings
+	@make -s eclipse_project PROJECT=Prusa-Firmware-Buddy_EEPROM
+	@make -s atollic_cproject PROJECT=Prusa-Firmware-Buddy_EEPROM
+	@make -s atollic_settings PROJECT=Prusa-Firmware-Buddy_EEPROM
 #	@make -s eclipse_cdtprojectproperties BUILD_CONFIGURATION=MINI_Debug_Boot
 #	@make -s eclipse_cdtprojectproperties BUILD_CONFIGURATION=MINI_Release_Boot

@@ -15,23 +15,23 @@ atollic_cproject:
 # cproject
 define atollic_xml_cproject
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject storage_type_id="org.atollic.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 $(atollic_xml_cdtCoreSettings)
 $(atollic_xml_cdtBuildSystem)
 $(atollic_xml_languageSettingsProviders)
 $(atollic_xml_refreshScope)
+$(atollic_xml_scannerConfiguration)
 $(atollic_xml_buildTargets)
 </cproject>
 endef
-#$(atollic_xml_scannerConfiguration)
 
 # cdtCoreSettings
 define atollic_xml_cdtCoreSettings =
-<storageModule moduleId="org.atollic.cdt.core.settings">
-$(call atollic_xml_cdtConfiguration,MINI_Debug_Boot,1147268816)
+<storageModule moduleId="org.eclipse.cdt.core.settings">
+$(call atollic_xml_cdtConfiguration,MINI_Debug_Boot,1147268816,346708880)
+$(call atollic_xml_cdtConfiguration,MINI_Release_Boot,1147268816.808720139,)
 </storageModule>
 endef
-#$(call atollic_xml_cdtConfiguration,MINI_Release_Boot)
 #$(call atollic_xml_cdtConfiguration,mini_debug_emptyboot)
 #$(call atollic_xml_cdtConfiguration,mini_release_emptyboot)
 
@@ -44,16 +44,16 @@ endef
 
 # languageSettingsProviders
 define atollic_xml_languageSettingsProviders =
-<storageModule moduleId="org.atollic.cdt.core.LanguageSettingsProviders"/>
+<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 endef
 
 # refreshScope
 define atollic_xml_refreshScope =
 <storageModule moduleId="refreshScope" versionNumber="2">
 $(call atollic_xml_refreshScope_config,MINI_Debug_Boot)
+$(call atollic_xml_refreshScope_config,MINI_Release_Boot)
 </storageModule>
 endef
-#$(call atollic_xml_refreshScope_config,MINI_Release_Boot)
 #$(call atollic_xml_refreshScope_config,mini_debug_emptyboot)
 #$(call atollic_xml_refreshScope_config,mini_release_emptyboot)
 
@@ -61,14 +61,14 @@ endef
 define atollic_xml_scannerConfiguration =
 <storageModule moduleId="scannerConfiguration">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-$(call atollic_xml_scannerConfig,1147268816,          346708880, 320776978,1988991514,702613059, 394661970)
+$(call atollic_xml_scannerConfig,1147268816,346708880,320776978,1988991514,702613059,394661970)
+$(call atollic_xml_scannerConfig,1147268816.808720139,,2021832184, 504662250,940200967,1628003946)
 </storageModule>
 endef
-#$(call atollic_xml_scannerConfig,1147268816.808720139,         ,2021832184, 504662250,940200967,1628003946)
 
 # buildTargets
 define atollic_xml_buildTargets =
-<storageModule moduleId="org.atollic.cdt.make.core.buildtargets">
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 $(call atollic_xml_buildTarget,clean,clean,make,-j)
 $(call atollic_xml_buildTarget,build,build,make,-j)
@@ -90,25 +90,25 @@ endef
 # cdtConfiguration, args: name, id, toolchain_id
 define atollic_xml_cdtConfiguration =
 <cconfiguration id="com.atollic.truestudio.exe.debug.toolchain.$(2)">
-	<storageModule buildSystemId="org.atollic.cdt.managedbuilder.core.configurationDataProvider" id="com.atollic.truestudio.exe.debug.toolchain.$(2)" moduleId="org.atollic.cdt.core.settings" name="$(1)">
+	<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.atollic.truestudio.exe.debug.toolchain.$(2)" moduleId="org.eclipse.cdt.core.settings" name="$(1)">
 		<externalSettings/>
 		<extensions>
-			<extension id="org.atollic.cdt.core.ELF" point="org.atollic.cdt.core.BinaryParser"/>
-			<extension id="org.atollic.cdt.core.GASErrorParser" point="org.atollic.cdt.core.ErrorParser"/>
-			<extension id="org.atollic.cdt.core.GLDErrorParser" point="org.atollic.cdt.core.ErrorParser"/>
-			<extension id="org.atollic.cdt.core.GCCErrorParser" point="org.atollic.cdt.core.ErrorParser"/>
-			<extension id="org.atollic.cdt.core.GmakeErrorParser" point="org.atollic.cdt.core.ErrorParser"/>
-			<extension id="org.atollic.cdt.core.CWDLocator" point="org.atollic.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+			<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 		</extensions>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<configuration artifactName="$${ProjName}" buildProperties="" description="make" id="com.atollic.truestudio.exe.debug.toolchain.$(2)" name="$(1)" parent="org.atollic.cdt.build.core.emptycfg">
+		<configuration artifactName="$${ProjName}" buildProperties="" description="make" id="com.atollic.truestudio.exe.debug.toolchain.$(2)" name="$(1)" parent="org.eclipse.cdt.build.core.emptycfg">
 			<folderInfo id="com.atollic.truestudio.exe.debug.toolchain.$(2).$(3)" name="/" resourcePath="">
 				<toolChain id="com.atollic.truestudio.exe.debug.toolchain.742233476" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain">
 					<option id="com.atollic.truestudio.general.runtimelib.2041860126" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib" value="com.atollic.truestudio.ld.general.cclib.CCSmallCSmall" valueType="enumerated"/>
 					<option id="com.atollic.truestudio.toolchain_options.mcu.2139731201" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu" value="STM32F407VG" valueType="string"/>
 					<option id="com.atollic.truestudio.toolchain_options.vendor.1973571411" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor" value="STMicroelectronics" valueType="string"/>
-					<targetPlatform archList="all" binaryParser="org.atollic.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform.1713535076" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
+					<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform.1713535076" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
 					<builder buildPath="$${workspace_loc:/$(PROJECT)}" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.3.0\\ARMTools\\bin|" id="com.atollic.pctools.managedbuild.target.gnu.builder.base.1600182299" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="GNU Make Builder" parallelBuildOn="true" parallelizationNumber="unlimited" superClass="com.atollic.pctools.managedbuild.target.gnu.builder.base">
 						<outputEntries>
 							<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
@@ -155,7 +155,7 @@ $(atollic_xml_cdtConfig_symbols)
 			</folderInfo>
 		</configuration>
 	</storageModule>
-	<storageModule moduleId="org.atollic.cdt.core.externalSettings"/>
+	<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 </cconfiguration>
 endef
 
@@ -181,7 +181,7 @@ endef
 
 # buildTarget, args: name, target, command, params
 define atollic_xml_buildTarget =
-<target name="$(1)" path="" targetID="org.atollic.cdt.build.MakeTargetBuilder">
+<target name="$(1)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 	<buildCommand>$(3)</buildCommand>
 	<buildArguments>$(4)</buildArguments>
 	<buildTarget>$(2)</buildTarget>
@@ -191,6 +191,8 @@ define atollic_xml_buildTarget =
 </target>
 endef
 
+#define atollic_xml_cdtConfig_includes =
+#endef
 # cdtConfig_includes, args: name
 define atollic_xml_cdtConfig_includes =
 <listOptionValue builtIn="false" value="../include"/>
@@ -237,6 +239,8 @@ define atollic_xml_cdtConfig_includes =
 <listOptionValue builtIn="false" value="../lib/inih"/>
 endef
 
+#define atollic_xml_cdtConfig_symbols =
+#endef
 # cdtConfig_symbols, args: name
 define atollic_xml_cdtConfig_symbols =
 <listOptionValue builtIn="false" value="__weak='__attribute__((weak))'"/>
