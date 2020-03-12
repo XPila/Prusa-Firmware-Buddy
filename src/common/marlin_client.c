@@ -37,18 +37,20 @@
 
 // client
 typedef struct _marlin_client_t {
-    uint8_t id; // client id (0..MARLIN_MAX_CLIENTS-1)
-    uint16_t flags; // client flags (MARLIN_CFLG_xxx)
-    uint64_t events; // event mask
-    uint64_t changes; // variable change mask
-    marlin_vars_t vars; // cached variables
-    uint32_t ack; // cached ack value from last Acknowledge event
+    uint8_t id;          // client id (0..MARLIN_MAX_CLIENTS-1)
+    uint16_t flags;      // client flags (MARLIN_CFLG_xxx)
+    uint64_t events;     // event mask
+    uint64_t changes;    // variable change mask
+    marlin_vars_t vars;  // cached variables
+    uint32_t ack;        // cached ack value from last Acknowledge event
     uint16_t last_count; // number of messages received in last client loop
     uint64_t errors;
-    marlin_mesh_t mesh; // meshbed leveling
-    uint32_t command; // processed command (G28,G29,M701,M702,M600)
-    marlin_host_prompt_t prompt; // current host prompt structure (type and buttons)
-    uint8_t reheating; // reheating in progress
+    marlin_mesh_t mesh;                // meshbed leveling
+    uint32_t command;                  // processed command (G28,G29,M701,M702,M600)
+    marlin_host_prompt_t prompt;       // current host prompt structure (type and buttons)
+    uint8_t reheating;                 // reheating in progress
+    dialog_open_cb_t dialog_open_cb;   // to register callback for screen creation (M876), callback ensures M876 is processed asap, so there is no need for queue
+    dialog_close_cb_t dialog_close_cb; // to register callback for screen destruction
 } marlin_client_t;
 
 #pragma pack(pop)
@@ -56,16 +58,16 @@ typedef struct _marlin_client_t {
 //-----------------------------------------------------------------------------
 // variables
 
-osThreadId marlin_client_task[MARLIN_MAX_CLIENTS]; // task handles
+osThreadId marlin_client_task[MARLIN_MAX_CLIENTS];    // task handles
 osMessageQId marlin_client_queue[MARLIN_MAX_CLIENTS]; // input queue handles (uint32_t)
 
 marlin_client_t marlin_client[MARLIN_MAX_CLIENTS]; // client structure
-uint8_t marlin_clients = 0; // number of connected clients
+uint8_t marlin_clients = 0;                        // number of connected clients
 
 //-----------------------------------------------------------------------------
 // external variables from marlin_server
 
-extern osThreadId marlin_server_task; // task handle
+extern osThreadId marlin_server_task;    // task handle
 extern osMessageQId marlin_server_queue; // input queue (uint8_t)
 extern osSemaphoreId marlin_server_sema; // semaphore handle
 
@@ -105,6 +107,8 @@ marlin_vars_t *marlin_client_init(void) {
         client->mesh.yc = 4;
         client->command = MARLIN_CMD_NONE;
         client->reheating = 0;
+        client->dialog_open_cb = NULL;
+        client->dialog_close_cb = NULL;
         marlin_client_task[client_id] = osThreadGetId();
     }
     osSemaphoreRelease(marlin_server_sema);
@@ -133,13 +137,38 @@ void marlin_client_loop(void) {
         while ((ose = osMessageGet(queue, 0)).status == osEventMessage) {
             if (client->flags & MARLIN_CFLG_LOWHIGH) {
                 *(((uint32_t *)(&msg)) + 1) = ose.value.v; //store high dword
-                _process_client_message(client, msg); //call handler
+                _process_client_message(client, msg);      //call handler
                 count++;
             } else
                 *(((uint32_t *)(&msg)) + 0) = ose.value.v; //store low dword
-            client->flags ^= MARLIN_CFLG_LOWHIGH; //flip flag
+            client->flags ^= MARLIN_CFLG_LOWHIGH;          //flip flag
         }
     client->last_count = count;
+}
+
+int marlin_client_id(void) {
+    marlin_client_t *client = _client_ptr();
+    if (client)
+        return client->id;
+    return 0;
+}
+
+int marlin_client_set_dialog_open_cb(dialog_open_cb_t cb) {
+    marlin_client_t *client = _client_ptr();
+    if (client && cb) {
+        client->dialog_open_cb = cb;
+        return 1;
+    }
+    return 0;
+}
+
+int marlin_client_set_dialog_close_cb(dialog_close_cb_t cb) {
+    marlin_client_t *client = _client_ptr();
+    if (client && cb) {
+        client->dialog_close_cb = cb;
+        return 1;
+    }
+    return 0;
 }
 
 int marlin_processing(void) {
@@ -229,7 +258,7 @@ void marlin_gcode_push_front(const char *gcode) {
     _wait_ack_from_server(client->id);
 }
 
-int marlin_event(uint8_t evt_id) {
+int marlin_event(MARLIN_EVT_t evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
     uint64_t msk = (uint64_t)1 << evt_id;
@@ -238,7 +267,7 @@ int marlin_event(uint8_t evt_id) {
     return ret;
 }
 
-int marlin_event_set(uint8_t evt_id) {
+int marlin_event_set(MARLIN_EVT_t evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
     uint64_t msk = (uint64_t)1 << evt_id;
@@ -249,7 +278,7 @@ int marlin_event_set(uint8_t evt_id) {
     return ret;
 }
 
-int marlin_event_clr(uint8_t evt_id) {
+int marlin_event_clr(MARLIN_EVT_t evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
     uint64_t msk = (uint64_t)1 << evt_id;
@@ -573,16 +602,16 @@ void _send_request_to_server(uint8_t client_id, const char *request) {
     osMessageQId queue = 0;
     int i;
     osSemaphoreWait(marlin_server_sema, osWaitForever); // lock
-    if ((queue = marlin_server_queue) != 0) // queue valid
+    if ((queue = marlin_server_queue) != 0)             // queue valid
     {
         marlin_client[client_id].events &= ~MARLIN_EVT_MSK(MARLIN_EVT_Acknowledge);
         while (ret == 0) {
             if (osMessageAvailableSpace(queue) >= (uint32_t)(len + 1)) // check available space
             {
                 osMessagePut(queue, '0' + client_id, osWaitForever); // one character client id
-                for (i = 0; i < len; i++) // loop over every characters
-                    osMessagePut(queue, request[i], osWaitForever); //
-                if ((i > 0) && (request[i - 1] != '\n')) // automatically terminate with '\n'
+                for (i = 0; i < len; i++)                            // loop over every characters
+                    osMessagePut(queue, request[i], osWaitForever);  //
+                if ((i > 0) && (request[i - 1] != '\n'))             // automatically terminate with '\n'
                     osMessagePut(queue, '\n', osWaitForever);
                 ret = 1;
             } else {
@@ -624,7 +653,7 @@ void _process_client_message(marlin_client_t *client, variant8_t msg) {
     } else if (msg.type == VARIANT8_USER) // event received
     {
         client->events |= ((uint64_t)1 << id);
-        switch (id) {
+        switch ((MARLIN_EVT_t)id) {
         case MARLIN_EVT_MeshUpdate: {
             uint8_t x = msg.usr16 & 0xff;
             uint8_t y = msg.usr16 >> 8;
@@ -663,6 +692,34 @@ void _process_client_message(marlin_client_t *client, variant8_t msg) {
             break;
         case MARLIN_EVT_Acknowledge:
             client->ack = msg.ui32;
+            break;
+        case MARLIN_EVT_DialogOpen:
+            if (client->dialog_open_cb)
+                client->dialog_open_cb((dialog_t)msg.ui32);
+            break;
+        case MARLIN_EVT_DialogClose:
+            if (client->dialog_close_cb)
+                client->dialog_close_cb((dialog_t)msg.ui32);
+            break;
+            //not handled events
+            //do not use default, i want all events listed here, so new event will generate warning, when not added
+        case MARLIN_EVT_Startup:
+        case MARLIN_EVT_Idle:
+        case MARLIN_EVT_PrinterKilled:
+        case MARLIN_EVT_MediaInserted:
+        case MARLIN_EVT_MediaError:
+        case MARLIN_EVT_MediaRemoved:
+        case MARLIN_EVT_PlayTone:
+        case MARLIN_EVT_PrintTimerStarted:
+        case MARLIN_EVT_PrintTimerPaused:
+        case MARLIN_EVT_PrintTimerStopped:
+        case MARLIN_EVT_FilamentRunout:
+        case MARLIN_EVT_UserConfirmRequired:
+        case MARLIN_EVT_StatusChanged:
+        case MARLIN_EVT_FactoryReset:
+        case MARLIN_EVT_LoadSettings:
+        case MARLIN_EVT_StoreSettings:
+        case MARLIN_EVT_SafetyTimerExpired:
             break;
         }
 #ifdef DBG_EVT_MSK
