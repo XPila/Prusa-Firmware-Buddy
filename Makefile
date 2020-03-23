@@ -2,6 +2,7 @@
 # Makefile to compile and link Prusa-Firmware-Buddy
 PROJECT ?= Prusa-Firmware-Buddy
 
+
 # build configuration list for make
 MAKE_CONFIGURATIONS  := MINI_Debug_Boot MINI_Release_Boot
 # build configuration list for cmake
@@ -55,7 +56,9 @@ OUTHEX := $(OUT)/$(PROJECT).hex # hex output file
 OUTBIN := $(OUT)/$(PROJECT).bin # bin output file
 
 # all source
-ifeq (1, 1)
+ifneq ("$(wildcard srclist)","")
+ALLSRC := $(file < srclist)
+else
 ALLSRC := \
 $(addprefix lib/,\
 	$(addprefix Arduino_Core_A3ides/cores/arduino/,wiring_analog.c wiring_digital.c wiring_time.c HardwareSerial.cpp Print.cpp SPI.cpp Stream.cpp USBSerial.cpp)\
@@ -122,8 +125,6 @@ $(addprefix src/,startup/startup_stm32f407xx_boot.s ethernetif.c fatfs.c lwip.c 
 	src/gui/screen_qr_info.cpp\
 	src/guiapi/src/window_qr.c\
 	src/marlin_stubs/M876.cpp
-else
-ALLSRC := $(file < make/srclist.mk)
 endif
 
 # external definitions
@@ -273,8 +274,8 @@ build_all:
 	$(foreach cfg,$(MAKE_CONFIGURATIONS),make -s build BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
 
 include make/CMake.mk
-#include make/Debug.mk
+include make/Debug.mk
 #include make/Eclipse.mk
-include make/Atollic.mk
+#include make/Atollic.mk
 #include make/CubeIDE.mk
 #include make/VSCode.mk
