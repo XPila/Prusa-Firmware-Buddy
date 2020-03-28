@@ -62,8 +62,8 @@ ifneq ("$(wildcard srclist)","")
 ALLSRC := $(file < srclist)
 else
 ALLSRC := \
-$(addprefix lib/,\
-	$(addprefix Arduino_Core_A3ides/cores/arduino/,wiring_analog.c wiring_digital.c wiring_time.c HardwareSerial.cpp Print.cpp SPI.cpp Stream.cpp USBSerial.cpp)\
+$(addprefix lib/,CRC/tm_stm32f4_crc.c QR/qrcodegen.c\
+	$(addprefix Arduino_Core_A3ides/cores/arduino/,wiring_analog.c wiring_digital.c wiring_time.c HardwareSerial.cpp Print.cpp Stream.cpp USBSerial.cpp)\
 	$(addprefix Drivers/STM32F4xx_HAL_Driver/Src/,stm32f4xx_hal.c stm32f4xx_hal_adc.c stm32f4xx_hal_cortex.c stm32f4xx_hal_dma.c stm32f4xx_hal_eth.c stm32f4xx_hal_flash.c stm32f4xx_hal_gpio.c stm32f4xx_hal_hcd.c stm32f4xx_hal_i2c.c stm32f4xx_hal_iwdg.c stm32f4xx_hal_pcd.c stm32f4xx_hal_pcd_ex.c stm32f4xx_hal_rcc.c stm32f4xx_hal_spi.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c stm32f4xx_hal_uart.c stm32f4xx_ll_usb.c)\
 	$(addprefix inih/,ini.c)\
 	$(addprefix Marlin/Marlin/src/,Marlin.cpp\
@@ -82,9 +82,9 @@ $(addprefix lib/,\
 			$(addprefix sdcard/,M20.cpp M21_M22.cpp M23.cpp M24_M25.cpp M26.cpp M27.cpp M28_M29.cpp M30.cpp M32.cpp M524.cpp M928.cpp)\
 			$(addprefix stats/,M31.cpp M75-M78.cpp)\
 			$(addprefix temperature/,M104_M109.cpp M105.cpp M106_M107.cpp M140_M190.cpp M155.cpp M303.cpp))\
-		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp persistent_store_eeprom.cpp STM32F4/timers.cpp watchdog.cpp)\
+		$(addprefix HAL/HAL_STM32_F4_F7/,HAL.cpp STM32F4/timers.cpp watchdog.cpp)\
 		$(addprefix lcd/,extensible_ui/ui_api.cpp ultralcd.cpp)\
-		$(addprefix libs/,buzzer.cpp crc16.cpp nozzle.cpp stopwatch.cpp)\
+		$(addprefix libs/,buzzer.cpp nozzle.cpp stopwatch.cpp)\
 		$(addprefix module/,configuration_store.cpp endstops.cpp motion.cpp planner.cpp probe.cpp stepper.cpp temperature.cpp tool_change.cpp stepper/indirection.cpp stepper/trinamic.cpp))\
 	$(addprefix Middlewares/,\
 		$(addprefix ST/STM32_USB_Device_Library/,\
@@ -94,39 +94,22 @@ $(addprefix lib/,\
 			$(addprefix Class/,MSC/Src/usbh_msc.c MSC/Src/usbh_msc_bot.c MSC/Src/usbh_msc_scsi.c)\
 			$(addprefix Core/,Src/usbh_core.c Src/usbh_ctlreq.c Src/usbh_ioreq.c Src/usbh_pipes.c))\
 		$(addprefix ST/Utilites/CPU/,cpu_utils.c)\
-		$(addprefix Third_Party/,\
+		$(addprefix Third_Party/,LwIP/system/OS/sys_arch.c\
 			$(addprefix FatFs/src/,diskio.c ff.c ff_gen_drv.c option/syscall.c option/unicode.c)\
 			$(addprefix FreeRTOS/Source/,CMSIS_RTOS/cmsis_os.c list.c portable/GCC/ARM_CM4F/port.c portable/MemMang/heap_4.c queue.c tasks.c)\
 			$(addprefix lpng/,png.c pngerror.c pngget.c pngmem.c pngread.c pngrio.c pngrtran.c pngrutil.c pngset.c pngtrans.c)\
-			$(addprefix LwIP/,system/OS/sys_arch.c\
-				$(addprefix src/api/,api_lib.c api_msg.c err.c netbuf.c netdb.c netifapi.c sockets.c tcpip.c)\
-				$(addprefix src/core/,def.c dns.c inet_chksum.c init.c ip.c mem.c memp.c netif.c pbuf.c raw.c stats.c sys.c tcp.c tcp_in.c tcp_out.c timeouts.c udp.c $(addprefix ipv4/,autoip.c dhcp.c etharp.c icmp.c igmp.c ip4.c ip4_addr.c ip4_frag.c) $(addprefix ipv6/,dhcp6.c ethip6.c icmp6.c inet6.c ip6.c ip6_addr.c ip6_frag.c mld6.c nd6.c))\
-				$(addprefix src/netif/,ethernet.c lowpan6.c slipif.c\
-					$(addprefix ppp/,ccp.c chap-md5.c chap-new.c chap_ms.c demand.c eap.c ecp.c eui64.c fsm.c ipcp.c ipv6cp.c lcp.c magic.c mppe.c multilink.c ppp.c pppapi.c pppcrypt.c pppoe.c pppol2tp.c pppos.c upap.c utils.c vj.c)\
-				)\
-			)\
+			$(addprefix LwIP/src/,api/netifapi.c api/tcpip.c netif/ethernet.c\
+				$(addprefix core/,def.c init.c ip.c mem.c memp.c netif.c pbuf.c tcp.c tcp_in.c tcp_out.c timeouts.c udp.c ipv4/dhcp.c ipv4/etharp.c ipv4/icmp.c ipv4/ip4.c ipv4/ip4_addr.c ipv4/ip4_frag.c))\
 			$(addprefix zlib/,adler32.c crc32.c inffast.c inflate.c inftrees.c zutil.c)))\
 	$(addprefix TMCStepper/src/source/,DRV_STATUS.cpp GCONF.cpp CHOPCONF.cpp IHOLD_IRUN.cpp PWMCONF.cpp TMC2208Stepper.cpp TMC2209Stepper.cpp TMCStepper.cpp))\
-$(addprefix src/,startup/startup_stm32f407xx_boot.s ethernetif.c fatfs.c lwip.c main_MINI.c stm32f4xx_it.c stm32f4xx_hal_msp.c stm32f4xx_hal_timebase_tim.c system_stm32f4xx_boot.c usb_device.c usb_host.c usbd_cdc_if.c usbd_conf.c usbd_desc.c usbh_conf.c usbh_diskio.c\
-	$(addprefix common/,adc.c bsod.c crc32.c dbg.c diag.c dump.c eeprom.c eeprom_loadsave.c filament_sensor.c hwio_a3ides_2209_02.c ini_handler.c marlin_client.c marlin_events.c marlin_host.c marlin_vars.c minda_broken_cable_detection.c MindaRedscreen.c putslave.c safe_state.c st25dv64k.c sys.c thread_measurement.c uartrxbuff.c uartslave.c variant8.c version.c w25x.c appmain.cpp base64_stream_decoder.cpp gcode_file.cpp gcode_thumb_decoder.cpp Marlin_CardReader.cpp marlin_server.cpp print_utils.cpp trinamic.cpp)\
-	$(addprefix gui/,guimain.c resource.c screen_lan_settings.c screen_menu.c screen_menu_calibration.c screen_menu_filament.c screen_menu_fw_update.c screen_menu_info.c screen_menu_move.c screen_menu_service.c screen_menu_settings.c screen_menu_temperature.c screen_messages.c screen_print_preview.c screen_splash.c screen_sysinf.c screen_watchdog.c window_file_list.c window_header.c window_logo.c window_temp_graph.c filament.cpp menu_vars.cpp screen_filebrowser.cpp screen_home.cpp screen_menu_preheat.cpp screen_menu_tune.cpp screen_PID.cpp screen_printing.cpp screen_version_info.cpp status_footer.cpp\
+$(addprefix src/,startup/startup_stm32f407xx_boot.s ethernetif.c fatfs.c lwip.c main_MINI.c stm32f4xx_it.c stm32f4xx_hal_msp.c stm32f4xx_hal_timebase_tim.c system_stm32f4xx_boot.c usb_device.c usb_host.c usbd_cdc_if.c usbd_conf.c usbd_desc.c usbh_conf.c usbh_diskio.c marlin_stubs/M876.cpp\
+	$(addprefix common/,adc.c bsod.c crc32.c dbg.c diag.c dump.c eeprom.c eeprom_loadsave.c filament_sensor.c hwio_a3ides_2209_02.c ini_handler.c marlin_client.c marlin_events.c marlin_host.c marlin_vars.c minda_broken_cable_detection.c MindaRedscreen.c putslave.c safe_state.c st25dv64k.c sys.c thread_measurement.c uartrxbuff.c uartslave.c variant8.c version.c w25x.c appmain.cpp base64_stream_decoder.cpp gcode_file.cpp gcode_thumb_decoder.cpp Marlin_CardReader.cpp marlin_server.cpp print_utils.cpp trinamic.cpp errors.c lang.c support_utils.cpp)\
+	$(addprefix gui/,guimain.c resource.c screen_lan_settings.c screen_menu.c screen_menu_calibration.c screen_menu_filament.c screen_menu_fw_update.c screen_menu_info.c screen_menu_move.c screen_menu_service.c screen_menu_settings.c screen_menu_temperature.c screen_messages.c screen_print_preview.c screen_splash.c screen_sysinf.c screen_watchdog.c window_file_list.c window_header.c window_logo.c window_temp_graph.c filament.cpp menu_vars.cpp screen_filebrowser.cpp screen_home.cpp screen_menu_preheat.cpp screen_menu_tune.cpp screen_PID.cpp screen_printing.cpp screen_version_info.cpp status_footer.cpp screen_printing_serial.cpp screen_qr_error.cpp screen_qr_info.cpp\
 		$(addprefix Dialogs/,window_dlg_change.c window_dlg_load.c window_dlg_statemachine.c window_dlg_loadunload_shared.c window_dlg_popup.c window_dlg_preheat.c window_dlg_purge.c window_dlg_unload.c window_dlg_wait.c)\
 		$(addprefix Test/,screen_test.c screen_test_disp_mem.c screen_test_graph.c screen_test_gui.c screen_test_msgbox.c screen_test_term.c screen_mesh_bed_lv.cpp screen_test_temperature.cpp)\
 		$(addprefix Wizard/,firstlay.c screen_wizard.c selftest.c selftest_cool.c selftest_fans_axis.c selftest_temp.c wizard.c wizard_load_unload.c wizard_ui.c xyzcalib.c))\
-	$(addprefix guiapi/src/,button_draw.c display.c display_helper.c gui.c gui_timer.c guitypes.c jogwheel.c screen.c st7789v.c term.c window.c window_frame.c window_icon.c window_list.c window_menu.c window_msgbox.c window_numb.c window_progress.c window_spin.c window_term.c window_text.c)\
-	$(addprefix wui/,wui.c wui_api.c wui_helper_funcs.c progress_data_wrapper.c\
-		$(addprefix http/,altcp_proxyconnect.c fs.c http_client.c httpd.c))\
-)\
-	lib/CRC/tm_stm32f4_crc.c\
-	lib/QR/qrcodegen.c\
-	src/common/errors.c\
-	src/common/lang.c\
-	src/common/support_utils.cpp\
-	src/gui/screen_printing_serial.cpp\
-	src/gui/screen_qr_error.cpp\
-	src/gui/screen_qr_info.cpp\
-	src/guiapi/src/window_qr.c\
-	src/marlin_stubs/M876.cpp
+	$(addprefix guiapi/src/,button_draw.c display.c display_helper.c gui.c gui_timer.c guitypes.c jogwheel.c screen.c st7789v.c term.c window.c window_frame.c window_icon.c window_list.c window_menu.c window_msgbox.c window_numb.c window_progress.c window_spin.c window_term.c window_text.c window_qr.c)\
+	$(addprefix wui/,wui.c wui_api.c wui_helper_funcs.c progress_data_wrapper.c http/fs.c http/httpd.c))
 endif
 
 # external definitions
