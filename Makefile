@@ -31,7 +31,9 @@ SHELL_CAT ?= $(if $(findstring /,$(PATH_SEPARATOR)),cat,type)
 SHELL_CMDSEP ?= $(if $(findstring /,$(PATH_SEPARATOR)), ; , & )
 
 # default printer MINI
-PRINTER ?= 2
+PRINTER ?= MINI
+# default printer MINI
+PRINTER_TYPE ?= 2
 # default firmware buildnumber 1
 FW_BUILD_NUMBER ?= 1
 # default firmware version 4.0.2
@@ -112,7 +114,7 @@ $(addprefix src/,startup/startup_stm32f407xx_boot.s ethernetif.c fatfs.c lwip.c 
 		$(addprefix Test/,screen_test.c screen_test_disp_mem.c screen_test_graph.c screen_test_gui.c screen_test_msgbox.c screen_test_term.c screen_mesh_bed_lv.cpp screen_test_temperature.cpp)\
 		$(addprefix Wizard/,firstlay.c screen_wizard.c selftest.c selftest_cool.c selftest_fans_axis.c selftest_temp.c wizard.c wizard_load_unload.c wizard_ui.c xyzcalib.c))\
 	$(addprefix guiapi/src/,button_draw.c display.c display_helper.c gui.c gui_timer.c guitypes.c jogwheel.c screen.c st7789v.c term.c window.c window_frame.c window_icon.c window_list.c window_menu.c window_msgbox.c window_numb.c window_progress.c window_spin.c window_term.c window_text.c)\
-	$(addprefix wui/,wui.c wui_api.c\
+	$(addprefix wui/,wui.c wui_api.c wui_helper_funcs.c progress_data_wrapper.c\
 		$(addprefix http/,altcp_proxyconnect.c fs.c http_client.c httpd.c))\
 )\
 	lib/CRC/tm_stm32f4_crc.c\
@@ -143,13 +145,16 @@ SYMBOLS := $(addprefix -D,\
 	USBD_USE_CDC\
 	USBCON\
 	_EXTUI\
-	LWIP_HTTPD_CUSTOM_FILES=1\
+	LWIP_HTTPD_CUSTOM_FILES=0\
 	MARLIN_DISABLE_INFINITE_LOOP\
-	PRINTER_TYPE=$(PRINTER)\
+	PRINTER=$(PRINTER)\
+	PRINTER_TYPE=$(PRINTER_TYPE)\
 	FW_BUILD_NUMBER=$(FW_BUILD_NUMBER)\
 	FW_VERSION=$(FW_VERSION)\
 	HAS_GUI=1\
 	HTTPD_FSDATA_FILE="\"fsdata_wui_local.c\""\
+	INIT_TRINAMIC_FROM_MARLIN_ONLY=0\
+	BUDDY_ENABLE_WUI\
 )
 
 # include directories
@@ -167,11 +172,13 @@ INCLUDES := $(addprefix -I./,\
 	$(addprefix lib/Middlewares/Third_Party/,zlib lpng)\
 	$(addprefix src/, gui gui/Dialogs guiapi/include wui common wui/resources)\
 	lib/Marlin/Marlin\
+	lib/Marlin/Marlin/src/gcode/lcd\
 	$(addprefix lib/Middlewares/Third_Party/LwIP/,system src/apps/httpd src/include\
 		$(addprefix src/include/, netif/ppp lwip lwip/apps lwip/priv lwip/prot netif posix))\
 	lib/inih\
 	lib/QR\
 	lib/CRC\
+	lib/jsmn\
 )
 
 # common flags
