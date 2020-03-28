@@ -12,6 +12,7 @@ extern screen_t *pscreen_test_msgbox;
 extern screen_t *pscreen_test_graph;
 extern screen_t *pscreen_test_temperature;
 extern screen_t *pscreen_test_disp_mem;
+extern screen_t *pscreen_test_eeprom;
 
 #pragma pack(push)
 #pragma pack(1)
@@ -29,6 +30,7 @@ typedef struct
     window_text_t tst_heat_err;
     window_text_t tst_disp_memory;
     window_text_t tst_stack_overflow;
+    window_text_t tst_eeprom;
     int8_t id_tim;
     int8_t id_tim1;
 } screen_test_data_t;
@@ -46,7 +48,8 @@ typedef enum {
     STI_tst_temperature,
     STI_tst_heat_err,
     STI_tst_disp_memory,
-    STI_tst_stack_overflow
+    STI_tst_stack_overflow,
+    STI_tst_eeprom
 } STI_tag_t;
 
 void screen_test_init(screen_t *screen) {
@@ -112,6 +115,12 @@ void screen_test_init(screen_t *screen) {
     window_set_text(id, (const char *)"Stack overflow");
     window_enable(id);
     window_set_tag(id, STI_tst_stack_overflow);
+    y += 22;
+
+    id = window_create_ptr(WINDOW_CLS_TEXT, id0, rect_ui16(10, y, 220, 22), &(pd->tst_eeprom));
+    window_set_text(id, (const char *)"test EEPROM");
+    window_enable(id);
+    window_set_tag(id, STI_tst_eeprom);
 
     pd->id_tim = gui_timer_create_oneshot(2000, id0);
     pd->id_tim1 = gui_timer_create_periodical(4000, id0);
@@ -161,6 +170,9 @@ int screen_test_event(screen_t *screen, window_t *window, uint8_t event, void *p
             return 1;
         case STI_tst_stack_overflow:
             recursive(0);
+            return 1;
+        case STI_tst_eeprom:
+            screen_open(pscreen_test_eeprom->id);
             return 1;
         }
     else if (event == WINDOW_EVENT_TIMER) {

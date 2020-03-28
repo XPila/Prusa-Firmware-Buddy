@@ -39,6 +39,7 @@ extern screen_t *pscreen_test_term;
 extern screen_t *pscreen_test_msgbox;
 extern screen_t *pscreen_test_graph;
 extern screen_t *pscreen_test_temperature;
+extern screen_t *pscreen_test_eeprom;
 extern screen_t *pscreen_home;
 extern screen_t *pscreen_filebrowser;
 extern screen_t *pscreen_printing;
@@ -229,6 +230,7 @@ void gui_run(void) {
     screen_register(pscreen_test_msgbox);
     screen_register(pscreen_test_graph);
     screen_register(pscreen_test_temperature);
+    screen_register(pscreen_test_eeprom);
     screen_register(pscreen_home);
     screen_register(pscreen_filebrowser);
     screen_register(pscreen_printing);

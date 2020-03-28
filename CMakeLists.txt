@@ -532,6 +532,7 @@ if(GUI)
             src/gui/test/screen_test_term.c
             src/gui/test/screen_test_msgbox.c
             src/gui/test/screen_test_graph.c
+            src/gui/test/screen_test_eeprom.c
             src/gui/wizard/selftest_fans_axis.c
             src/gui/wizard/selftest_temp.c
             src/gui/wizard/selftest_cool.c
