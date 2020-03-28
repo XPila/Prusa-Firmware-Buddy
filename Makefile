@@ -2,7 +2,6 @@
 # Makefile to compile and link Prusa-Firmware-Buddy
 PROJECT ?= Prusa-Firmware-Buddy
 
-
 # build configuration list for make
 MAKE_CONFIGURATIONS  := MINI_Debug_Boot MINI_Release_Boot
 # build configuration list for cmake
@@ -19,21 +18,21 @@ endif
 # target platform prefix, default is arm-none-eabi
 TOOLCHAIN_PREFIX ?= arm-none-eabi
 
-# file path separator for SHELL_RMDIR and SHELL_MKDIR (default is unix '/', for windows use - '\\')
+# file path separator (default is unix '/', for windows use - '\\')
 PATH_SEPARATOR ?= /
-# shell command for removing directories (default is unix, for windows use - 'SHELL_RMDIR /S /Q')
+# shell command for removing directories (default is unix, for windows use - 'RMDIR /S /Q')
 SHELL_RMDIR ?= rm -rvf
-# shell command for creating directories (default is unix, for windows use - 'SHELL_MKDIR')
+# shell command for creating directories (default is unix, for windows use - 'MKDIR')
 SHELL_MKDIR ?= mkdir -p
 # shell command 'cat'
 SHELL_CAT ?= $(if $(findstring /,$(PATH_SEPARATOR)),cat,type)
 # shell command separator
 SHELL_CMDSEP ?= $(if $(findstring /,$(PATH_SEPARATOR)), ; , & )
 
-# default printer MINI
-PRINTER ?= MINI
-# default printer MINI
-PRINTER_TYPE ?= 2
+# printer name from configuration
+PRINTER ?= $(word 1,$(subst _, ,$(BUILD_CONFIGURATION)))
+# printer type from printer name
+PRINTER_TYPE = $(subst MINI,2,$(PRINTER))
 # default firmware buildnumber 1
 FW_BUILD_NUMBER ?= 1
 # default firmware version 4.0.2
