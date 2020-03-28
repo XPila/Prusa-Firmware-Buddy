@@ -55,6 +55,7 @@ src/
 EOF
 )
 
+cd ../..
 
 echo "processing directory tree..."
 # root directory stack (LF separated)
@@ -85,12 +86,12 @@ echo "$DIR_TREE" | tr '\t' "\/" | while read line; do            # loop
 	last_path=$root$item
 	last_depth=$depth
 	echo $last_path' '$depth' '$item
-	if [ ! -e ../$last_path ]; then echo " ERR: not found" >&2; fi
+	if [ ! -e $last_path ]; then echo " ERR: not found" >&2; fi
 done
 )
 
 echo "processing files..."
-SRC_LIST=$(cat 'srclist.mk' | tr ' ' "\n")
+SRC_LIST=$(cat 'srclist' | tr ' ' "\n")
 FILE_LIST=$(\
 echo "$DIR_LIST" | sort -r | while read path depth item; do
 	files=$(echo "$SRC_LIST" | grep ^$path | cut -c$((${#path}+1))- | tr '\n' " ")
@@ -113,8 +114,8 @@ last_depth=1
 	printf '%*s' $(($depth - 1)) | tr ' ' '\t'
 	echo -n '$(addprefix '$item','$files
 	last_depth=$depth
-done | head -n-1 | tail -n+2 >srclist_compressed.mk
+done | head -n-1 | tail -n+2 >srclist_compressed
 
-echo "finished"
+echo 'finished'
 
-read x;exit
+read x
