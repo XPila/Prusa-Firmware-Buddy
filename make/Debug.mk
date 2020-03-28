@@ -3,6 +3,11 @@
 
 include make/Multiline.mk
 
+#SRCFILE_TO_EXCLUDE := src/main_MINI.c
+OBJFILE_TO_EXCLUDE := $(subst .c,.o,$(subst .cpp,.o,$(SRCFILE_TO_EXCLUDE)))
+OBJLIST2 := $(filter-out $(OUT)/$(OBJFILE_TO_EXCLUDE),$(ASMOBJ) $(GCCOBJ) $(GPPOBJ))
+
+
 print_ENVVARS:
 	@echo BUILD_CONFIGURATION=$(BUILD_CONFIGURATION)
 	@echo TOOLCHAIN_PREFIX=$(TOOLCHAIN_PREFIX)
@@ -25,3 +30,11 @@ print_ALLSRC:
 	@echo ALLSRC for configuration $(BUILD_CONFIGURATION)
 	$(file > $(OUT)/allsrc.txt,$(subst $(SPACE),$(NEWLINE),$(ALLSRC)))
 	@$(SHELL_CAT) $(subst /,$(PATH_SEPARATOR),$(OUT)/allsrc.txt)
+
+test:
+#	@echo TEST for configuration $(BUILD_CONFIGURATION)
+#	@echo SRCFILE=$(SRCFILE_TO_EXCLUDE)
+#	@echo OBJFILE=$(OBJFILE_TO_EXCLUDE)
+#	@echo OBJLIST=$(OBJLIST2)
+	@$(file > $(OUT)/.objlist_test,$(OBJLIST2))
+	@$(GPP) -o $(OUT)/test.elf @$(OUT)/.objlist_test $(LDFLAGS)
