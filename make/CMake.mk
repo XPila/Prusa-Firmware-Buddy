@@ -16,3 +16,5 @@ cmake:
 		--build-type $(CMAKE_BUILD_TYPE)\
 		--bootloader $(CMAKE_BOOTLOADER)\
 		--no-store-output --generate-bbf
+	@$(SHELL_RM) $(subst /,$(PATH_SEPARATOR),$(OUT))$(PATH_SEPARATOR)firmware.elf
+	@$(SHELL_MV) $(subst /,$(PATH_SEPARATOR),$(OUT))$(PATH_SEPARATOR)firmware firmware.elf

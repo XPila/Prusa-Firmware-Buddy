@@ -20,14 +20,20 @@ TOOLCHAIN_PREFIX ?= arm-none-eabi
 
 # file path separator (default is unix '/', for windows use - '\\')
 PATH_SEPARATOR ?= /
-# shell command for removing directories (default is unix, for windows use - 'RMDIR /S /Q')
-SHELL_RMDIR ?= rm -rvf
-# shell command for creating directories (default is unix, for windows use - 'MKDIR')
-SHELL_MKDIR ?= mkdir -p
+# unix shell or windows shell - determine by PATH_SEPARATOR
+SHELL_IS_UNIX ?= $(findstring /,$(PATH_SEPARATOR))
+# shell command for removing directories
+SHELL_RMDIR ?= $(if $(SHELL_IS_UNIX),rm -rvf,RMDIR /S /Q)
+# shell command for creating directories
+SHELL_MKDIR ?= $(if $(SHELL_IS_UNIX),mkdir -p,MKDIR)
+# shell command for removing files
+SHELL_RM ?= $(if $(SHELL_IS_UNIX),rm,DEL /Q)
+# shell command for renaming files/dirs
+SHELL_MV ?= $(if $(SHELL_IS_UNIX),mv,REN)
 # shell command 'cat'
-SHELL_CAT ?= $(if $(findstring /,$(PATH_SEPARATOR)),cat,type)
+SHELL_CAT ?= $(if $(SHELL_IS_UNIX),cat,TYPE)
 # shell command separator
-SHELL_CMDSEP ?= $(if $(findstring /,$(PATH_SEPARATOR)), ; , & )
+SHELL_CMDSEP ?= $(if $(SHELL_IS_UNIX), ; , & )
 
 # printer name from configuration
 PRINTER ?= $(word 1,$(subst _, ,$(BUILD_CONFIGURATION)))
@@ -263,11 +269,11 @@ endif
 
 clean_all:
 	@echo removing output files of ALL configurations
-	@$(foreach cfg,$(ALL_CONFIGURATIONS),make -s clean BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
+	@$(foreach cfg,$(ALL_CONFIGURATIONS),make -s clean BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))
 
 build_all:
 	@echo building ALL configurations
-	$(foreach cfg,$(MAKE_CONFIGURATIONS),make -s build BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))REM
+	$(foreach cfg,$(MAKE_CONFIGURATIONS),make -s build BUILD_CONFIGURATION=$(cfg) $(SHELL_CMDSEP))
 
 include make/CMake.mk
 include make/Debug.mk
