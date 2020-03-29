@@ -33,10 +33,14 @@ SHELL_CMDSEP ?= $(if $(findstring /,$(PATH_SEPARATOR)), ; , & )
 PRINTER ?= $(word 1,$(subst _, ,$(BUILD_CONFIGURATION)))
 # printer type from printer name
 PRINTER_TYPE = $(subst MINI,2,$(PRINTER))
-# default firmware buildnumber 1
-FW_BUILD_NUMBER ?= 1
-# default firmware version 4.0.2
-FW_VERSION ?= 402
+# default firmware buildnumber from git
+FW_BUILD_NUMBER ?= $(shell git rev-list --count HEAD)
+# firmware version from file 'version', format '4.0.5'
+FW_VERSION ?= $(file < version.txt)
+# firmware version suffix, format '-BETA+1234'
+FW_VERSION_SUFFIX ?= -BETA+$(FW_BUILD_NUMBER)
+# firmware version full, format '4.0.5-BETA+1234'
+FW_VERSION_FULL ?= $(FW_VERSION)$(FW_VERSION_SUFFIX)
 # default arduino version 1.87
 ARDUINO     := 187
 # default matherboard A3IDES_2209_02
@@ -133,6 +137,9 @@ SYMBOLS := $(addprefix -D,\
 	PRINTER_TYPE=$(PRINTER_TYPE)\
 	FW_BUILD_NUMBER=$(FW_BUILD_NUMBER)\
 	FW_VERSION=$(FW_VERSION)\
+	FW_VERSION_FULL=$(FW_VERSION_FULL)\
+	FW_VERSION_SUFFIX=$(FW_VERSION_SUFFIX)\
+	FW_VERSION_SUFFIX_SHORT=$(FW_VERSION_SUFFIX)\
 	HAS_GUI=1\
 	HTTPD_FSDATA_FILE="\"fsdata_wui_local.c\""\
 	INIT_TRINAMIC_FROM_MARLIN_ONLY=0\
