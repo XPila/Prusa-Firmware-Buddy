@@ -277,7 +277,7 @@ build_all:
 
 include make/CMake.mk
 include make/Debug.mk
-#include make/Eclipse.mk
+include make/Eclipse.mk
 #include make/Atollic.mk
 #include make/CubeIDE.mk
 #include make/VSCode.mk

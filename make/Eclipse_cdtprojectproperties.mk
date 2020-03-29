@@ -2,7 +2,7 @@
 # Eclipse CDT project properies xml file generator
 
 # generate eclipse cdtprojectproperties
-eclipse_cdtprojectproperties: $(OUTDIR)
+eclipse_cdtprojectproperties:
 	@echo generting eclipse cdtprojectproperties xml file
 	$(file > $(OUT)/cdtprojectproperties.xml,$(eclipse_xml_cdtprojectproperties))
 #	@$(SHELL_CAT) $(subst /,$(PATH_SEPARATOR),$(OUT)/cdtprojectproperties.xml)
@@ -18,7 +18,7 @@ eclipse_xml_INCLUDES := $(subst $(SPACE),$(NEWLINE),$(eclipse_xml_INCLUDES))
 eclipse_xml_SYMBOLS := $(subst -D,,$(SYMBOLS))
 eclipse_xml_SYMBOLS := $(foreach sym,$(eclipse_xml_SYMBOLS),$(if $(findstring =,$(sym)),$(sym),$(sym)=))
 eclipse_xml_SYMBOLS := $(patsubst %,<macro><name>%</value></macro>,$(eclipse_xml_SYMBOLS))
-eclipse_xml_SYMBOLS := $(subst \=,</name><value>,$(eclipse_xml_SYMBOLS))
+eclipse_xml_SYMBOLS := $(subst =,</name><value>,$(eclipse_xml_SYMBOLS))
 eclipse_xml_SYMBOLS := $(subst <value></value>,<value/>,$(eclipse_xml_SYMBOLS))
 eclipse_xml_SYMBOLS := $(subst $(SPACE),$(NEWLINE),$(eclipse_xml_SYMBOLS))
 
