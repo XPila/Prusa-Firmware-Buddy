@@ -181,8 +181,8 @@ CMNFLAGS := -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunctio
 
 # compiler flags
 ASMFLAGS := $(CMNFLAGS) -Wa,--no-warn -x assembler-with-cpp
-GCCFLAGS := $(CMNFLAGS) -std=gnu11 $(INCLUDES) -fstack-usage -Wall
-GPPFLAGS := $(CMNFLAGS) -std=gnu++11 $(INCLUDES) -fno-exceptions -fstack-usage -Wall -fno-threadsafe-statics
+GCCFLAGS := $(CMNFLAGS) $(INCLUDES) -fstack-usage -Wall
+GPPFLAGS := $(CMNFLAGS) $(INCLUDES) -fno-exceptions -fstack-usage -Wall -fno-threadsafe-statics
 
 # debug/release configuration (optimalization and debug info flags + _DEBUG symbol)
 ifneq (,$(findstring Debug, $(BUILD_CONFIGURATION)))
