@@ -4,9 +4,11 @@
 #include "gui.h"
 #include "bsod.h"
 
-#define SCREEN_MAX_SCREENS 32
+#define SCREEN_MAX_SCREENS 48
 
-#define SCREEN_MAX_HISTORY 32
+// potential dependency of SCREEN_MAX_HISTORY and SCREEN_MAX_SCREENS is unclear
+// but yet these two defines were kept in sync (same values)
+#define SCREEN_MAX_HISTORY 48
 
 screen_t *screen_0 = 0; //current screen
 
@@ -95,21 +97,6 @@ void screen_close(void) {
             screen_0->pdata = gui_malloc(screen_0->data_size);
         screen_0->init(screen_0);
         window_set_capture(0);
-    }
-}
-
-int _current_in_list(screen_t *const *list, size_t sz) {
-    screen_t *curr = screen_get_curr();
-    for (size_t i = 0; i < sz; ++sz)
-        if (curr == list[sz])
-            return 1;
-    return 0;
-}
-
-void screen_unloop(screen_t *const *unl_blacklist, size_t sz) {
-
-    while (!_current_in_list(unl_blacklist, sz)) {
-        screen_close();
     }
 }
 
