@@ -29,6 +29,7 @@
 #include "safe_state.h"
 #include "crc32.h"
 #include "ff.h"
+#include "wdt.h"
 
 #include <Arduino.h>
 #include "trinamic.h"
@@ -109,8 +110,32 @@ void app_run(void) {
         settings.reset();
     }
 
+#if 1
+    RTC_TimeTypeDef rtc_setTime;
+    memset(&rtc_setTime, 0, sizeof(RTC_TimeTypeDef));
+    rtc_setTime.Hours = 20;
+    rtc_setTime.Minutes = 30;
+    rtc_setTime.Seconds = 40;
+    rtc_setTime.TimeFormat = RTC_HOURFORMAT12_AM;
+    rtc_setTime.SubSeconds = 0;
+    rtc_setTime.SecondFraction = 16;
+    rtc_setTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+    rtc_setTime.StoreOperation = RTC_STOREOPERATION_SET;
+    volatile HAL_StatusTypeDef rtc_set_time_result = HAL_RTC_SetTime(&hrtc, &rtc_setTime, RTC_FORMAT_BIN);
+    DBG("RTC: SetTime returns %u", rtc_set_time_result);
+    RTC_DateTypeDef rtc_setDate;
+    memset(&rtc_setDate, 0, sizeof(RTC_DateTypeDef));
+    rtc_setDate.WeekDay = 1;
+    rtc_setDate.Month = 1;
+    rtc_setDate.Date = 16;
+    rtc_setDate.Year = 2020;
+    volatile HAL_StatusTypeDef rtc_set_date_result = HAL_RTC_SetDate(&hrtc, &rtc_setDate, RTC_FORMAT_BIN);
+    DBG("RTC: SetDate returns %u", rtc_set_date_result);
+    osDelay(2000);
+#endif
+
     while (1) {
-        if (marlin_server_processing()) {
+/*        if (marlin_server_processing()) {
             loop();
         }
         uartslave_cycle(&uart6slave);
@@ -143,7 +168,24 @@ void app_run(void) {
             z = sim_motion_pos[2];
             DBG("Z:%li", z);
         }
-#endif //SIM_MOTION_TRACE_Z
+#endif //SIM_MOTION_TRACE_Z*/
+#if 1
+        static uint32_t rtct = 0;
+        uint32_t t = HAL_GetTick();
+        if ((t - rtct) > 1000) {
+            rtct = t;
+            //            RTC_DateTypeDef currDate;
+            //            volatile HAL_RTCStateTypeDef rtc_state = HAL_RTC_GetState(&hrtc);
+            volatile HAL_RTCStateTypeDef rtc_state = HAL_RTC_STATE_READY;
+            RTC_TimeTypeDef currTime;
+            memset(&currTime, 0, sizeof(RTC_TimeTypeDef));
+            HAL_RTC_GetTime(&hrtc, &currTime, RTC_FORMAT_BIN);
+            //            HAL_RTC_GetDate(&hrtc, &currDate, RTC_FORMAT_BIN);
+            DBG("RTC: state=%d time=%02u:%02u:%02u.%05u", rtc_state, currTime.Hours, currTime.Minutes, currTime.Seconds, currTime.SubSeconds);
+            osDelay(0); // switch to other threads - without this is UI slow
+            wdt_iwdg_refresh();
+        }
+#endif //RTC_TRACE
     }
 }
 
