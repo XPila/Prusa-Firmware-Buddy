@@ -5,6 +5,7 @@
 extern "C" {
 #endif //__cplusplus
 
+extern void hook_tmc(void);
 extern void init_tmc(void);
 extern void tmc_set_mres();
 extern void tmc_set_move(uint8_t tmc, uint32_t step, uint8_t dir, uint8_t speed);

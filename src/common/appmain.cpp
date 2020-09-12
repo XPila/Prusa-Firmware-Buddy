@@ -78,6 +78,8 @@ void app_idle(void) {
 void app_run(void) {
     DBG("app_run");
 
+    hook_tmc();
+
 #ifdef BUDDY_ENABLE_ETHERNET
     if (diag_fastboot)
         osThreadResume(webServerTaskHandle);
