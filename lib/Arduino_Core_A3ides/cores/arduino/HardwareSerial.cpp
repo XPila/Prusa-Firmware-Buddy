@@ -2,14 +2,7 @@
 #include <Arduino.h>
 #include "cmsis_os.h"
 
-// This include creates a dependency on the `Common` library.
-// TODO: Create proper indirection.
-//#include "dbg.h"
-
 // uart2 (communication with TMC2209)
-
-//#define DBG _dbg0 //debug level 0
-#define DBG(...) //disable debug
 
 extern "C" {
 
@@ -21,6 +14,10 @@ extern int32_t uart2_signal;
 uint8_t rbuff[10];
 unsigned int rbufc = 0;
 unsigned int rbufi = 0;
+
+typedef void(tmc2209_packet_cb_t)(uint8_t *tx_data, uint8_t tx_size, uint8_t *rx_data, uint8_t rx_size);
+
+tmc2209_packet_cb_t *tmc2209_packet_cb = 0;
 }
 
 HardwareSerial::HardwareSerial(void *peripheral) {
@@ -46,10 +43,6 @@ int HardwareSerial::read(void) {
         ch = rbuff[rbufi++];
         rbufc--;
     }
-    if (ch == -1)
-        DBG(" rx -1");
-    else
-        DBG(" rx %02hhx %d", (uint8_t)ch, rbufc);
     return ch;
 }
 
@@ -75,37 +68,38 @@ size_t HardwareSerial::write(uint8_t c) {
             HAL_UART_Transmit(&huart2, buf, len, HAL_MAX_DELAY);
             if (len == 4) //
             {
-                DBG("tx %02x %02x %02x %02x", buf[0], buf[1], buf[2], buf[3]);
                 osEvent ose;
                 if ((ose = osSignalWait(uart2_signal, 100)).status == osEventSignal) {
-                    DBG("signal, received %d", 12);
-                    DBG("rx %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x", buf2[0], buf2[1], buf2[2], buf2[3], buf2[4], buf2[5], buf2[6], buf2[7], buf2[8], buf2[9], buf2[10], buf2[11]);
+                    if (tmc2209_packet_cb)
+                        tmc2209_packet_cb(buf, 4, buf2, 12);
                     memcpy(rbuff, buf2 + 4, 8);
                     rbufi = 0;
                     rbufc = 8;
                     retry = 0;
                 } else if (ose.status == osEventTimeout) {
-                    DBG("timeout, received %d", hdma_usart2_rx.Instance->NDTR);
                     HAL_UART_AbortReceive(&huart2);
+                    if (tmc2209_packet_cb)
+                        tmc2209_packet_cb(buf, 4, 0, 0);
                 }
             } else if (len == 8) //
             {
-                DBG("tx %02x %02x %02x %02x %02x %02x %02x %02x", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
                 osEvent ose;
                 if ((ose = osSignalWait(uart2_signal, 100)).status == osEventSignal) {
-                    DBG("signal, received %d", 4);
-                    DBG("rx %02x %02x %02x %02x", buf2[0], buf2[1], buf2[2], buf2[3]);
+                    if (tmc2209_packet_cb)
+                        tmc2209_packet_cb(buf, 8, buf2, 8);
                     memcpy(rbuff, buf2, 8);
                     rbufi = 0;
                     rbufc = 4;
                     retry = 0;
                 } else if (ose.status == osEventTimeout) {
-                    DBG("timeout, received %d", hdma_usart2_rx.Instance->NDTR);
                     HAL_UART_AbortReceive(&huart2);
+                    if (tmc2209_packet_cb)
+                        tmc2209_packet_cb(buf, 8, 0, 0);
                 }
             } else {
-                DBG("error - (len!=4) && (len!=8)");
                 HAL_UART_AbortReceive(&huart2);
+                if (tmc2209_packet_cb)
+                    tmc2209_packet_cb(0, 0, 0, 0);
             }
         }
         cnt = 0;
