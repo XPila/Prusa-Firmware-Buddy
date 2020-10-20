@@ -14,6 +14,16 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+class MI_SENSOR_INFO : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Sensor Info");
+
+public:
+    MI_SENSOR_INFO();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_FILAMENT : public WI_LABEL_t {
     static constexpr const char *const label = N_("Filament");
 
@@ -139,6 +149,28 @@ class MI_LANGUAGE : public WI_LABEL_t {
 
 public:
     MI_LANGUAGE();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_HW_SETUP : public WI_LABEL_t {
+    static constexpr const char *const label = N_("HW Setup");
+
+public:
+    MI_HW_SETUP();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_CURRENT_PROFILE : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Current Profile");
+
+public:
+    MI_CURRENT_PROFILE();
+
+    void UpdateLabel();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;

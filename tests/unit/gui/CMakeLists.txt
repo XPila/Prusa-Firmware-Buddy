@@ -16,3 +16,5 @@ target_include_directories(rectangle_tests PUBLIC
 add_catch_test(rectangle_tests)
 
 add_subdirectory(lazyfilelist)
+add_subdirectory(wizard)
+add_subdirectory(jogwheel)

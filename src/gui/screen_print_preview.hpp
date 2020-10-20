@@ -2,6 +2,7 @@
 #pragma once
 #include "gui.hpp"
 #include "window_header.hpp"
+#include "window_roll_text.hpp"
 #include "ff.h"
 
 static const constexpr uint16_t PADDING = 10;
@@ -48,8 +49,8 @@ struct GCodeInfoWithDescription : public GCodeInfo {
 };
 
 //todo implement draw, i am using visible property on some description_lines
-struct screen_print_preview_data_t : public window_frame_t {
-    window_text_t title_text;
+struct screen_print_preview_data_t : public AddSuperWindow<window_frame_t> {
+    window_roll_text_t title_text;
     window_icon_button_t print_button;
     window_text_t print_label;
     window_icon_button_t back_button;
@@ -63,9 +64,11 @@ public:
     screen_print_preview_data_t();
     ~screen_print_preview_data_t();
 
-private:
-    virtual void windowEvent(window_t *sender, uint8_t event, void *param) override;
+protected:
+    virtual void windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) override;
     //virtual void unconditionalDraw() override; //todo move draw from event
+
+private:
     bool gcode_file_exists();
 
 public:

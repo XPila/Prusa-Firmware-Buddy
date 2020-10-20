@@ -15,6 +15,16 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+class MI_LIVE_ADJUST_Z : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Live Adjust Z");
+
+public:
+    MI_LIVE_ADJUST_Z();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_AUTO_HOME : public WI_LABEL_t {
     static constexpr const char *const label = N_("Auto Home");
 
@@ -26,7 +36,7 @@ protected:
 };
 
 class MI_MESH_BED : public WI_LABEL_t {
-    static constexpr const char *const label = N_("Mesh Bed Level.");
+    static constexpr const char *const label = N_("Mesh Bed Leveling");
 
 public:
     MI_MESH_BED();
@@ -46,10 +56,60 @@ protected:
 };
 
 class MI_CALIB_FIRST : public WI_LABEL_t {
-    static constexpr const char *const label = N_("First Layer Cal.");
+    static constexpr const char *const label = N_("First Layer Calibration");
 
 public:
     MI_CALIB_FIRST();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_TEST_FANS : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Test FANs");
+
+public:
+    MI_TEST_FANS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_TEST_XYZ : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Test XYZ-Axis");
+
+public:
+    MI_TEST_XYZ();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_TEST_HEAT : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Test heaters");
+
+public:
+    MI_TEST_HEAT();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_TEST_FANS_fine : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Test FANs fine");
+
+public:
+    MI_TEST_FANS_fine();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_TEST_ABORT : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Test Abort");
+
+public:
+    MI_TEST_ABORT();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;
@@ -361,4 +421,28 @@ protected:
     virtual void click(IWindowMenu & /*window_menu*/) override {
         click_at(T);
     }
+};
+
+enum class SENSOR_STATE : int8_t {
+    unknown = -1,
+    low = 0,
+    high = 1,
+};
+
+class MI_FILAMENT_SENSOR_STATE : public WI_SPIN_I08_t {
+    static constexpr const char *const label = N_("Filament sensor");
+    SENSOR_STATE get_state();
+
+public:
+    MI_FILAMENT_SENSOR_STATE();
+    bool StateChanged();
+};
+
+class MI_MINDA : public WI_SPIN_I08_t {
+    static constexpr const char *const label = N_("M.I.N.D.A.");
+    SENSOR_STATE get_state();
+
+public:
+    MI_MINDA();
+    bool StateChanged();
 };

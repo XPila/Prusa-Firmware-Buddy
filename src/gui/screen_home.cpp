@@ -17,12 +17,12 @@
 #include "i18n.h"
 
 const uint16_t icons[6] = {
-    IDR_PNG_menu_icon_print,
-    IDR_PNG_menu_icon_preheat,
-    IDR_PNG_menu_icon_spool,
-    IDR_PNG_menu_icon_calibration,
-    IDR_PNG_menu_icon_settings,
-    IDR_PNG_menu_icon_info
+    IDR_PNG_print_58px,
+    IDR_PNG_preheat_58px,
+    IDR_PNG_spool_58px,
+    IDR_PNG_calibrate_58px,
+    IDR_PNG_settings_58px,
+    IDR_PNG_info_58px
 };
 
 constexpr size_t labelPrintId = 0;
@@ -40,10 +40,10 @@ const char *labels[7] = {
 static bool find_latest_gcode(char *fpath, int fpath_len, char *fname, int fname_len);
 
 screen_home_data_t::screen_home_data_t()
-    : window_frame_t()
+    : AddSuperWindow<window_frame_t>()
     , header(this)
     , footer(this)
-    , logo(this, Rect16(41, 31, 158, 40), IDR_PNG_status_logo_prusa_prn)
+    , logo(this, Rect16(41, 31, 158, 40), IDR_PNG_prusa_printer_logo)
     , w_buttons { { this, Rect16(), 0, []() { Screens::Access()->Open(ScreenFactory::Screen<screen_filebrowser_data_t>); } },
         { this, Rect16(), 0, []() { Screens::Access()->Open(GetScreenMenuPreheat); } },
         { this, Rect16(), 0, []() { Screens::Access()->Open(GetScreenMenuFilament); } },
@@ -58,13 +58,19 @@ screen_home_data_t::screen_home_data_t()
         { this, Rect16(), is_multiline::no } }
 
 {
+    window_frame_t::ClrMenuTimeoutClose();
+    window_frame_t::ClrOnSerialClose(); // don't close on Serial print
     // Every 49days and some time in 5 seconds window, auto filebrowser open will not work.
     // Seconds (timestamp) from UNIX epocho will fix this
     time = HAL_GetTick();
     is_starting = (time < 5000) ? 1 : 0;
 
-    header.SetIcon(IDR_PNG_status_icon_home);
+    header.SetIcon(IDR_PNG_home_shape_16px);
+#ifndef _DEBUG
     header.SetText(_("HOME"));
+#else
+    header.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)(N_("HOME - DEBUG - what a beautifull rolling text"))));
+#endif
 
     for (uint8_t row = 0; row < 2; row++) {
         for (uint8_t col = 0; col < 3; col++) {
@@ -92,7 +98,7 @@ void screen_home_data_t::draw() {
 #endif //_DEBUG
 }
 
-void screen_home_data_t::windowEvent(window_t *sender, uint8_t event, void *param) {
+void screen_home_data_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
 
     if (is_starting) // first 1000ms (cca 50ms is event period) skip MediaInserted
     {
@@ -131,7 +137,7 @@ void screen_home_data_t::windowEvent(window_t *sender, uint8_t event, void *para
         printBtnDis();
     }
 
-    window_frame_t::windowEvent(sender, event, param);
+    SuperWindowEvent(sender, event, param);
 }
 
 static bool find_latest_gcode(char *fpath, int fpath_len, char *fname, int fname_len) {

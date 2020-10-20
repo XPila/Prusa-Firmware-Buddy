@@ -181,15 +181,16 @@ void WI_SELECT_t::printText(IWindowMenu &window_menu, Rect16 rect, color_t color
 /*****************************************************************************/
 //MI_RETURN
 MI_RETURN::MI_RETURN()
-    : WI_LABEL_t(label, IDR_PNG_filescreen_icon_up_folder, true, false) {
+    : WI_LABEL_t(label, IDR_PNG_folder_up_16px, true, false) {
 }
 
-void MI_RETURN::click(IWindowMenu & /*window_menu*/) {
+void MI_RETURN::click(IWindowMenu &window_menu) {
+    window_menu.Validate(); /// don't redraw since we leave the menu
     Screens::Access()->Close();
 }
 
 MI_TEST_DISABLED_RETURN::MI_TEST_DISABLED_RETURN()
-    : WI_LABEL_t(label, IDR_PNG_filescreen_icon_up_folder, false, false) {
+    : WI_LABEL_t(label, IDR_PNG_folder_up_16px, false, false) {
 }
 
 void MI_TEST_DISABLED_RETURN::click(IWindowMenu & /*window_menu*/) {

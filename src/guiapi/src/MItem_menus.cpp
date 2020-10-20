@@ -5,6 +5,8 @@
 #include "screen_qr_error.hpp"
 #include "screen_test.hpp"
 #include "screen_messages.hpp"
+#include "eeprom.h"
+#include "marlin_client.h"
 
 /*****************************************************************************/
 //MI_VERSION_INFO
@@ -14,6 +16,16 @@ MI_VERSION_INFO::MI_VERSION_INFO()
 
 void MI_VERSION_INFO::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(GetScreenMenuVersionInfo);
+}
+
+/*****************************************************************************/
+//MI_SENSOR_INFO
+MI_SENSOR_INFO::MI_SENSOR_INFO()
+    : WI_LABEL_t(label, 0, true, false) {
+}
+
+void MI_SENSOR_INFO::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuSensorInfo);
 }
 
 /*****************************************************************************/
@@ -132,4 +144,35 @@ MI_LANGUAGE::MI_LANGUAGE()
 
 void MI_LANGUAGE::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(GetScreenMenuLanguages);
+}
+
+/*****************************************************************************/
+//MI_HW_SETUP
+MI_HW_SETUP::MI_HW_SETUP()
+    : WI_LABEL_t(label, 0, true, false) {
+}
+
+void MI_HW_SETUP::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuHwSetup);
+}
+
+/*****************************************************************************/
+//MI_CURRENT_PROFILE
+MI_CURRENT_PROFILE::MI_CURRENT_PROFILE()
+    : WI_LABEL_t(label, 0, true, true) {
+}
+
+void MI_CURRENT_PROFILE::click(IWindowMenu & /*window_menu*/) {
+    sheet_next_calibrated();
+    UpdateLabel();
+    marlin_settings_load();
+}
+
+void MI_CURRENT_PROFILE::UpdateLabel() {
+    char name[MAX_SHEET_NAME_LENGTH + 3];
+    name[0] = '[';
+    uint32_t cnt = sheet_active_name(name + 1, MAX_SHEET_NAME_LENGTH);
+    name[cnt + 1] = ']';
+    name[cnt + 2] = 0;
+    SetLabel(name);
 }

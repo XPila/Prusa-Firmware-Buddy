@@ -5,13 +5,14 @@
 
 #include "config.h"
 #include "version.h"
-#include "wizard/wizard.h"
 #include "eeprom.h"
 
 #include "stm32f4xx_hal.h"
 #include "i18n.h"
 #include "../lang/translator.hpp"
 #include "language_eeprom.hpp"
+#include "screen_wizard.hpp"
+#include "bsod.h"
 
 #ifdef _EXTUI
     #include "marlin_client.h"
@@ -24,13 +25,18 @@ void screen_splash_data_t::timer(uint32_t mseconds) {
 
 screen_splash_data_t::screen_splash_data_t()
     : window_frame_t()
-    , logo_prusa_mini(this, Rect16(0, 84, 240, 62), IDR_PNG_splash_logo_prusa_prn)
+    , logo_prusa_mini(this, Rect16(0, 84, 240, 62), IDR_PNG_prusa_printer_splash)
     , text_progress(this, Rect16(10, 171, 220, 20), is_multiline::no)
     , progress(this, Rect16(10, 200, 220, 15), 15, COLOR_ORANGE, COLOR_GRAY)
     , text_version(this, Rect16(0, 295, 240, 22), is_multiline::no)
     , icon_logo_buddy(this, Rect16(), 0)  //unused?
     , icon_logo_marlin(this, Rect16(), 0) //unused?
-    , icon_debug(this, Rect16(80, 240, 80, 80), IDR_PNG_splash_logo_marlin) {
+    , icon_debug(this, Rect16(80, 240, 80, 80), IDR_PNG_marlin_logo) {
+
+    if (ScreenWizard::IsConfigInvalid()) {
+        static const char en_text[] = N_("Wizard states invalid");
+        bsod(en_text);
+    }
 
     text_progress.font = resource_font(IDR_FNT_NORMAL);
     text_progress.SetAlignment(ALIGN_CENTER_BOTTOM);
@@ -52,7 +58,7 @@ void screen_splash_data_t::draw() {
 #endif //_DEBUG
 }
 
-void screen_splash_data_t::windowEvent(window_t *sender, uint8_t event, void *param) {
+void screen_splash_data_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
     timer(HAL_GetTick());
 
 #ifdef _EXTUI

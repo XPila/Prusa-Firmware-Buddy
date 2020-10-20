@@ -14,6 +14,8 @@
 #include "display_helper.h"
 #include "../common/marlin_vars.h" // for FILE_PATH_MAX_LEN
 #include "lazyfilelist.h"
+#include "text_roll.hpp"
+
 using LDV9 = LazyDirView<9>;
 
 // This enum value is stored to eeprom as file sort settings
@@ -51,10 +53,11 @@ public:
     /// @return true if path is either empty or contains just a "/"
     static bool IsPathRoot(const char *path);
 
+protected:
+    virtual void windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) override;
+
 private:
     virtual void unconditionalDraw() override;
-    virtual void windowEvent(window_t *sender, uint8_t event, void *param) override;
     void inc(int dif);
     void dec(int dif);
-    void init_text_roll();
 };
