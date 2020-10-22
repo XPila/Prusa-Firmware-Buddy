@@ -411,7 +411,6 @@ target_link_libraries(
           Marlin
           Arduino::Core
           Arduino::TMCStepper
-          Arduino::LiquidCrystal
           LwIP
           FatFs
           lpng
