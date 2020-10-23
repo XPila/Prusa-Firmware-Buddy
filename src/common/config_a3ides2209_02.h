@@ -88,6 +88,12 @@ static const uint8_t FANCTL1_PWM_THR = 20;
 
 #endif //NEW_FANCTL
 
+//--------------------------------------
+//TMC2209 - new tmc2209 driver
+#define NEW_TMC2209
+#ifdef NEW_TMC2209
+#endif //NEW_TMC2209
+
 //Simulator configuration
 //#define SIM_HEATER
 //#define SIM_MOTION

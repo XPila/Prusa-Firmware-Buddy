@@ -56,7 +56,9 @@ CFanCtl fanctl1 = CFanCtl(
 
 extern void USBSerial_put_rx_data(uint8_t *buffer, uint32_t length);
 
+#ifndef NEW_TMC2209
 extern void reset_trinamic_drivers();
+#endif //NEW_TMC2209
 
 extern "C" {
 
@@ -114,7 +116,9 @@ void app_run(void) {
             for (int i = 0; i < hwio_fan_get_cnt(); ++i)
                 hwio_fan_set_pwm(i, 0); // disable fans
         }
+#ifndef NEW_TMC2209
         reset_trinamic_drivers();
+#endif //NEW_TMC2209
         if (INIT_TRINAMIC_FROM_MARLIN_ONLY == 0) {
             init_tmc();
         }

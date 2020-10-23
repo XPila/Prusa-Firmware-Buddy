@@ -2,7 +2,13 @@
 #include "trinamic.h"
 #include "dbg.h"
 #include "config.h"
-#include "TMCStepper.h"
+
+#ifdef NEW_TMC2209
+
+#else //NEW_TMC2209
+    #include "TMCStepper.h"
+#endif //NEW_TMC2209
+
 #include "gpio.h"
 #include "hwio_pindef.h"
 #include "../Marlin/src/module/stepper.h"
@@ -38,7 +44,11 @@
 #if ((MOTHERBOARD == 1823))
 
 using namespace buddy::hw;
+    #ifdef NEW_TMC2209
+
+    #else  //NEW_TMC2209
 static TMC2209Stepper *pStep[4] = { nullptr, nullptr, nullptr, nullptr };
+    #endif //NEW_TMC2209
 
 static uint16_t tmc_sg[4];      // stallguard result for each axis
 static uint8_t tmc_sg_mask = 7; // stalguard result sampling mask (bit0-x, bit1-y, ...), xyz by default
@@ -162,6 +172,9 @@ void hook_tmc(void) {
 }
 
 void init_tmc(void) {
+    #ifdef NEW_TMC2209
+
+    #else //NEW_TMC2209
 
     //pointers to TMCStepper instances
     pStep[X_AXIS] = &stepperX;
@@ -178,6 +191,8 @@ void init_tmc(void) {
     pStep[Y_AXIS]->SGTHRS(130);
     pStep[Z_AXIS]->SGTHRS(100);
     pStep[E_AXIS]->SGTHRS(100);
+
+    #endif //NEW_TMC2209
 }
 
 // this function performs stallguard sample for single axis
@@ -187,6 +202,10 @@ void init_tmc(void) {
 //  Using stepper.axis_is_moving is simple but in some cases we get bad samples (tstep > TCOOLTHRS).
 //  Maybe we can improve this by calculating tstep from stepper variables.
 uint8_t tmc_sample(void) {
+    #ifdef NEW_TMC2209
+    uint8_t mask = 0;
+    return mask;
+    #else  //NEW_TMC2209
     uint8_t mask = 0;
     if (tmc_sg_mask) {
         while ((tmc_sg_mask & (1 << tmc_sg_axis)) == 0)
@@ -201,22 +220,36 @@ uint8_t tmc_sample(void) {
         tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
     }
     return mask;
+    #endif //NEW_TMC2209
 }
 
 void tmc_set_sgthrs(uint16_t SGT) {
+    #ifdef NEW_TMC2209
+
+    #else  //NEW_TMC2209
     pStep[0]->SGTHRS(SGT);
     pStep[1]->SGTHRS(SGT);
     pStep[2]->SGTHRS(SGT);
     pStep[3]->SGTHRS(SGT);
+    #endif //NEW_TMC2209
 }
 void tmc_set_mres() {
+    #ifdef NEW_TMC2209
+
+    #else  //NEW_TMC2209
     pStep[0]->mres(4);
     pStep[1]->mres(4);
     pStep[2]->mres(4);
     pStep[3]->mres(4);
+    #endif //NEW_TMC2209
 }
+
 uint8_t tmc_get_diag() //0 = X, 2 = Y, 4 = Z, 8 = E
 {
+    #ifdef NEW_TMC2209
+    unsigned int diag = 0;
+    return diag;
+    #else  //NEW_TMC2209
     unsigned int diag = 0;
     uint16_t tmp_step;
     uint16_t step = 3500;
@@ -251,9 +284,13 @@ uint8_t tmc_get_diag() //0 = X, 2 = Y, 4 = Z, 8 = E
             break;
     }
     return diag;
+    #endif //NEW_TMC2209
 }
 
 void tmc_move(uint8_t step_mask, uint16_t step, uint8_t speed) {
+    #ifdef NEW_TMC2209
+
+    #else  //NEW_TMC2209
     uint16_t tmp_step;
     for (tmp_step = 0; tmp_step < step; step--) {
         if (step_mask & 1)
@@ -270,14 +307,19 @@ void tmc_move(uint8_t step_mask, uint16_t step, uint8_t speed) {
         zStep.write(Pin::State::low);
         e0Step.write(Pin::State::low);
     }
+    #endif //NEW_TMC2209
 }
 
 void tmc_set_move(uint8_t tmc, uint32_t step, uint8_t dir, uint8_t speed) {
+    #ifdef NEW_TMC2209
+
+    #else  //NEW_TMC2209
     xDir.write(static_cast<Pin::State>(dir));
     yDir.write(static_cast<Pin::State>(dir));
     zDir.write(static_cast<Pin::State>(dir));
     e0Dir.write(static_cast<Pin::State>(dir));
     tmc_move(tmc, step, speed);
+    #endif //NEW_TMC2209
 }
 
 } //extern "C"
