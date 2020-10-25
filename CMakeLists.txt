@@ -481,6 +481,8 @@ target_sources(
           src/common/sim_motion.cpp
           src/common/st25dv64k.c
           $<$<STREQUAL:${INIT_TRINAMIC_FROM_MARLIN_ONLY},NO>:src/common/trinamic.cpp>
+          lib/TMC2209/tmc2209.c
+          lib/TMC2209/tmc2209_regs.c
           src/common/w25x.c
           src/common/gcode_file.cpp
           src/common/gcode_thumb_decoder.cpp
