@@ -99,7 +99,9 @@
   #define Z_SLAVE_ADDRESS 0
   #define E0_SLAVE_ADDRESS 2
 #else
-  #error Unknown stepper driver
+  #ifndef NEW_TMC2209
+    #error Unknown stepper driver
+  #endif //NEW_TMC2209
 #endif
 
 //

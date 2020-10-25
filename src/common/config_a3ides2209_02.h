@@ -91,6 +91,10 @@ static const uint8_t FANCTL1_PWM_THR = 20;
 //--------------------------------------
 //TMC2209 - new tmc2209 driver
 #define NEW_TMC2209
+#define TMC2209_ID_X 1
+#define TMC2209_ID_Y 3
+#define TMC2209_ID_Z 0
+#define TMC2209_ID_E 2
 #ifdef NEW_TMC2209
 #endif //NEW_TMC2209
 

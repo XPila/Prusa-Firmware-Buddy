@@ -4,42 +4,18 @@
 #include "config.h"
 
 #ifdef NEW_TMC2209
-
+    #include "../lib/TMC2209/tmc2209.h"
 #else //NEW_TMC2209
     #include "TMCStepper.h"
 #endif //NEW_TMC2209
 
 #include "gpio.h"
+#include "bsod.h"
 #include "hwio_pindef.h"
 #include "../Marlin/src/module/stepper.h"
 
 #define DBG _dbg0 //debug level 0
 //#define DBG(...)  //disable debug
-
-#define TMC2209_REG_GCONF        0x00 // RW
-#define TMC2209_REG_GSTAT        0x01 // R+WC
-#define TMC2209_REG_IFCNT        0x02 // R
-#define TMC2209_REG_SLAVECONF    0x03 // W
-#define TMC2209_REG_OTP_PROG     0x04 // W
-#define TMC2209_REG_OTP_READ     0x05 // R
-#define TMC2209_REG_IOIN         0x06 // R
-#define TMC2209_REG_FACTORY_CONF 0x07 // RW
-#define TMC2209_REG_IHOLD_IRUN   0x10 // W
-#define TMC2209_REG_TPOWERDOWN   0x11 // W
-#define TMC2209_REG_TSTEP        0x12 // R
-#define TMC2209_REG_TPWMTHRS     0x13 // W
-#define TMC2209_REG_TCOOLTHRS    0x14 // W
-#define TMC2209_REG_VACTUAL      0x22 // W
-#define TMC2209_REG_SGTHRS       0x40 // W
-#define TMC2209_REG_SG_RESULT    0x41 // R
-#define TMC2209_REG_COOLCONF     0x42 // W
-#define TMC2209_REG_MSCNT        0x6a // R
-#define TMC2209_REG_MSCURACT     0x6b // R
-#define TMC2209_REG_CHOPCONF     0x6c // RW
-#define TMC2209_REG_DRV_STATUS   0x6f // R
-#define TMC2209_REG_PWMCONF      0x70 // RW
-#define TMC2209_REG_PWM_SCALE    0x71 // R
-#define TMC2209_REG_PWM_AUTO     0x72 // R
 
 #if ((MOTHERBOARD == 1823))
 
@@ -49,6 +25,9 @@ using namespace buddy::hw;
     #else  //NEW_TMC2209
 static TMC2209Stepper *pStep[4] = { nullptr, nullptr, nullptr, nullptr };
     #endif //NEW_TMC2209
+
+static const uint8_t tmc_id[4] = { TMC2209_ID_X, TMC2209_ID_Y, TMC2209_ID_Z, TMC2209_ID_E }; // axis slave ids
+static const char tmc_axis_char[4] = { 'X', 'Y', 'Z', 'E' };                                 // axis chars (for BSOD)
 
 static uint16_t tmc_sg[4];      // stallguard result for each axis
 static uint8_t tmc_sg_mask = 7; // stalguard result sampling mask (bit0-x, bit1-y, ...), xyz by default
@@ -66,76 +45,6 @@ void tmc_set_sg_mask(uint8_t mask) { tmc_sg_mask = mask; }
 void tmc_set_sg_axis(uint8_t axis) { tmc_sg_axis = axis; }
 void tmc_set_sg_sampe_cb(tmc_sg_sample_cb_t *cb) { tmc_sg_sampe_cb = cb; }
 
-uint8_t tmc2209_calc_crc(uint8_t *data, uint8_t size) {
-    int i, j;
-    uint8_t crc = 0; // CRC
-    uint8_t currentByte;
-    for (i = 0; i < (size - 1); i++) { // Execute for all bytes of a message
-        currentByte = data[i];         // Retrieve a byte
-        for (j = 0; j < 8; j++) {
-            if ((crc >> 7) ^ (currentByte & 0x01)) // update CRC based result of XOR operation
-                crc = (crc << 1) ^ 0x07;
-            else
-                crc = (crc << 1);
-            currentByte = currentByte >> 1;
-        } // for CRC bit
-    }     // for message byte
-    return crc;
-}
-
-const char *tmc2209_regname(uint8_t reg) {
-    switch (reg) {
-    case TMC2209_REG_GCONF:
-        return "GCONF";
-    case TMC2209_REG_GSTAT:
-        return "GSTAT";
-    case TMC2209_REG_IFCNT:
-        return "IFCNT";
-    case TMC2209_REG_SLAVECONF:
-        return "SLAVECONF";
-    case TMC2209_REG_OTP_PROG:
-        return "OTP_PROG";
-    case TMC2209_REG_OTP_READ:
-        return "OTP_READ";
-    case TMC2209_REG_IOIN:
-        return "IOIN";
-    case TMC2209_REG_FACTORY_CONF:
-        return "FACTORY_CONF";
-    case TMC2209_REG_IHOLD_IRUN:
-        return "IHOLD_IRUN";
-    case TMC2209_REG_TPOWERDOWN:
-        return "TPOWERDOWN";
-    case TMC2209_REG_TSTEP:
-        return "TSTEP";
-    case TMC2209_REG_TPWMTHRS:
-        return "TPWMTHRS";
-    case TMC2209_REG_TCOOLTHRS:
-        return "TCOOLTHRS";
-    case TMC2209_REG_VACTUAL:
-        return "VACTUAL";
-    case TMC2209_REG_SGTHRS:
-        return "SGTHRS";
-    case TMC2209_REG_SG_RESULT:
-        return "SG_RESULT";
-    case TMC2209_REG_COOLCONF:
-        return "COOLCONF";
-    case TMC2209_REG_MSCNT:
-        return "MSCNT";
-    case TMC2209_REG_MSCURACT:
-        return "MSCURACT";
-    case TMC2209_REG_CHOPCONF:
-        return "CHOPCONF";
-    case TMC2209_REG_DRV_STATUS:
-        return "DRV_STATUS";
-    case TMC2209_REG_PWMCONF:
-        return "PWMCONF";
-    case TMC2209_REG_PWM_SCALE:
-        return "PWM_SCALE";
-    case TMC2209_REG_PWM_AUTO:
-        return "PWM_AUTO";
-    }
-    return "";
-}
 void tmc_packet_cb(uint8_t *tx_data, uint8_t tx_size, uint8_t *rx_data, uint8_t rx_size) {
     if ((tx_size == 8) && (rx_size == 8)) {
         //DBG("tx %02x %02x %02x %02x %02x %02x %02x %02x", tx_data[0], tx_data[1], tx_data[2], tx_data[3], tx_data[4], tx_data[5], tx_data[6], tx_data[7]);
@@ -143,7 +52,7 @@ void tmc_packet_cb(uint8_t *tx_data, uint8_t tx_size, uint8_t *rx_data, uint8_t 
         uint8_t id = tx_data[1];
         uint8_t reg = tx_data[2] & 0x7f;
         uint32_t data = (((uint32_t)tx_data[3]) << 24) | (((uint32_t)tx_data[4]) << 16) | (((uint32_t)tx_data[5]) << 8) | ((uint32_t)tx_data[6]);
-        const char *regname = tmc2209_regname(reg);
+        const char *regname = tmc2209_regname((tmc2209_reg_addr_t)reg);
         DBG("TMC%d WR reg %12s value=0x%08x", id, regname, data);
     } else if ((tx_size == 4) && (rx_size == 12)) {
         //DBG("tx %02x %02x %02x %02x", tx_data[0], tx_data[1], tx_data[2], tx_data[3]);
@@ -151,7 +60,7 @@ void tmc_packet_cb(uint8_t *tx_data, uint8_t tx_size, uint8_t *rx_data, uint8_t 
         uint8_t id = tx_data[1];
         uint8_t reg = rx_data[4 + 2] & 0x7f;
         uint32_t data = (((uint32_t)rx_data[4 + 3]) << 24) | (((uint32_t)rx_data[4 + 4]) << 16) | (((uint32_t)rx_data[4 + 5]) << 8) | ((uint32_t)rx_data[4 + 6]);
-        const char *regname = tmc2209_regname(reg);
+        const char *regname = tmc2209_regname((tmc2209_reg_addr_t)reg);
         DBG("TMC%d RD reg %12s value=0x%08x", id, regname, data);
     }
 }
@@ -171,9 +80,26 @@ void hook_tmc(void) {
     tmc2209_packet_cb = tmc_packet_cb;
 }
 
+extern UART_HandleTypeDef huart2;
+
 void init_tmc(void) {
     #ifdef NEW_TMC2209
-
+    tmc2209_init(&huart2);
+    tmc2209_slave_config_t cfg_X { .mres = 4, .intpol = 1, .vsense = 1, .en_SpreadCycle = 0, .IHOLD_IRUN = 20, .tcoolthrs = 400, .sgthrs = 140 };
+    tmc2209_slave_config_t cfg_Y { .mres = 4, .intpol = 1, .vsense = 1, .en_SpreadCycle = 0, .IHOLD_IRUN = 20, .tcoolthrs = 400, .sgthrs = 130 };
+    tmc2209_slave_config_t cfg_Z { .mres = 5, .intpol = 1, .vsense = 1, .en_SpreadCycle = 0, .IHOLD_IRUN = 20, .tcoolthrs = 400, .sgthrs = 100 };
+    tmc2209_slave_config_t cfg_E { .mres = 4, .intpol = 1, .vsense = 1, .en_SpreadCycle = 1, .IHOLD_IRUN = 23, .tcoolthrs = 400, .sgthrs = 100 };
+    tmc2209_err_t resX = tmc2209_init_slave(TMC2209_ID_X, &cfg_X);
+    tmc2209_err_t resY = tmc2209_init_slave(TMC2209_ID_Y, &cfg_Y);
+    tmc2209_err_t resZ = tmc2209_init_slave(TMC2209_ID_Z, &cfg_Z);
+    tmc2209_err_t resE = tmc2209_init_slave(TMC2209_ID_E, &cfg_E);
+    if ((resX != TMC2209_ERR_OK) || (resY != TMC2209_ERR_OK) || (resZ != TMC2209_ERR_OK) || (resE != TMC2209_ERR_OK)) {
+        bsod("TMC init error\nX - %s\nY - %s\nZ - %s\nE - %s",
+            (resX == TMC2209_ERR_OK) ? "OK" : "ERR",
+            (resY == TMC2209_ERR_OK) ? "OK" : "ERR",
+            (resZ == TMC2209_ERR_OK) ? "OK" : "ERR",
+            (resE == TMC2209_ERR_OK) ? "OK" : "ERR");
+    }
     #else //NEW_TMC2209
 
     //pointers to TMCStepper instances
@@ -202,17 +128,20 @@ void init_tmc(void) {
 //  Using stepper.axis_is_moving is simple but in some cases we get bad samples (tstep > TCOOLTHRS).
 //  Maybe we can improve this by calculating tstep from stepper variables.
 uint8_t tmc_sample(void) {
-    #ifdef NEW_TMC2209
-    uint8_t mask = 0;
-    return mask;
-    #else  //NEW_TMC2209
     uint8_t mask = 0;
     if (tmc_sg_mask) {
         while ((tmc_sg_mask & (1 << tmc_sg_axis)) == 0)
             tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
         if (stepper.axis_is_moving((AxisEnum)tmc_sg_axis)) {
             mask = (1 << tmc_sg_axis);
+    #ifdef NEW_TMC2209
+            tmc2209_SG_RESULT_t sg_result;
+            tmc2209_err_t res = tmc2209_rdreg(tmc_id[tmc_sg_axis], TMC2209_REG_SG_RESULT, &sg_result.ui32);
+            if (res != TMC2209_ERR_OK)
+                bsod("TMC %c read error (SG_RESULT).", tmc_axis_char[tmc_sg_axis]);
+    #else  //NEW_TMC2209
             tmc_sg[tmc_sg_axis] = pStep[tmc_sg_axis]->SG_RESULT();
+    #endif //NEW_TMC2209
         } else
             tmc_sg[tmc_sg_axis] = 0;
         if (tmc_sg_sampe_cb)
@@ -220,7 +149,6 @@ uint8_t tmc_sample(void) {
         tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
     }
     return mask;
-    #endif //NEW_TMC2209
 }
 
 void tmc_set_sgthrs(uint16_t SGT) {
@@ -288,9 +216,6 @@ uint8_t tmc_get_diag() //0 = X, 2 = Y, 4 = Z, 8 = E
 }
 
 void tmc_move(uint8_t step_mask, uint16_t step, uint8_t speed) {
-    #ifdef NEW_TMC2209
-
-    #else  //NEW_TMC2209
     uint16_t tmp_step;
     for (tmp_step = 0; tmp_step < step; step--) {
         if (step_mask & 1)
@@ -307,19 +232,14 @@ void tmc_move(uint8_t step_mask, uint16_t step, uint8_t speed) {
         zStep.write(Pin::State::low);
         e0Step.write(Pin::State::low);
     }
-    #endif //NEW_TMC2209
 }
 
 void tmc_set_move(uint8_t tmc, uint32_t step, uint8_t dir, uint8_t speed) {
-    #ifdef NEW_TMC2209
-
-    #else  //NEW_TMC2209
     xDir.write(static_cast<Pin::State>(dir));
     yDir.write(static_cast<Pin::State>(dir));
     zDir.write(static_cast<Pin::State>(dir));
     e0Dir.write(static_cast<Pin::State>(dir));
     tmc_move(tmc, step, speed);
-    #endif //NEW_TMC2209
 }
 
 } //extern "C"

@@ -62,6 +62,9 @@
 #include "hwio_pindef_MINI.h"
 #include "gui.hpp"
 #include "config_a3ides2209_02.h"
+#ifdef NEW_TMC2209
+    #include "../lib/TMC2209/tmc2209.h"
+#endif //NEW_TMC2209
 
 /* USER CODE END Includes */
 
@@ -914,8 +917,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart == &huart1)
         uartrxbuff_rxcplt_cb(&uart1rxbuff);
     else if (huart == &huart2) {
+#ifdef NEW_TMC2209
+        tmc2209_rxcplt_cb();
+#else  //NEW_TMC2209
         if (uart2_thread)
             osSignalSet(uart2_thread, uart2_signal);
+#endif //NEW_TMC2209
     } else if (huart == &huart6)
         uartrxbuff_rxcplt_cb(&uart6rxbuff);
 }
